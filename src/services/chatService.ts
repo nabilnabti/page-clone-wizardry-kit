@@ -1,6 +1,6 @@
 
 import { db } from "@/lib/firebase";
-import { collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, limit, onSnapshot, Unsubscribe } from "firebase/firestore";
+import { collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, limit, onSnapshot, Unsubscribe, writeBatch } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 
 export interface Message {
@@ -133,7 +133,8 @@ export const markMessagesAsRead = async (chatId: string, userId: string): Promis
   
   const querySnapshot = await getDocs(q);
   
-  const batch = db.batch();
+  // Create a batch with writeBatch instead of db.batch()
+  const batch = writeBatch(db);
   querySnapshot.forEach((doc) => {
     batch.update(doc.ref, { read: true });
   });
