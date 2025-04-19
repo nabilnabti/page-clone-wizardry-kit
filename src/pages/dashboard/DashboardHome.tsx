@@ -1,8 +1,9 @@
-
 import { Card } from "@/components/ui/card";
 import { Users, Calendar, CreditCard, AlertTriangle, House, ArrowRight } from "lucide-react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Link } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 // Sample properties data - in a real app this would come from an API
 const properties = [
@@ -36,6 +37,8 @@ const properties = [
 ];
 
 export default function DashboardHome() {
+  const isMobile = useIsMobile();
+
   const stats = [
     { 
       title: "Upcoming Check-Ins", 
@@ -87,6 +90,65 @@ export default function DashboardHome() {
     { tenant: "Sophia Hall", rent: "$800", dueDate: "April 15, 2024" },
   ];
 
+  const PropertiesGrid = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {properties.map((property) => (
+        <PropertyCard key={property.id} property={property} />
+      ))}
+    </div>
+  );
+
+  const PropertiesCarousel = () => (
+    <Carousel className="w-full">
+      <CarouselContent>
+        {properties.map((property) => (
+          <CarouselItem key={property.id}>
+            <PropertyCard property={property} />
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <CarouselPrevious className="hidden md:flex" />
+      <CarouselNext className="hidden md:flex" />
+    </Carousel>
+  );
+
+  const PropertyCard = ({ property }) => (
+    <Card key={property.id} className="p-4 bg-white hover:shadow-lg transition-shadow">
+      <div className="flex justify-between items-start mb-3">
+        <div>
+          <h3 className="font-semibold text-lg">{property.name}</h3>
+          <p className="text-gray-500 text-sm">{property.location}</p>
+        </div>
+        <House className="h-5 w-5 text-[#7FD1C7]" />
+      </div>
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <div className="bg-gray-100 p-2 rounded">
+          <p className="text-xs text-gray-500">Units</p>
+          <p className="font-medium">{property.units}</p>
+        </div>
+        <div className="bg-gray-100 p-2 rounded">
+          <p className="text-xs text-gray-500">Occupancy</p>
+          <p className="font-medium">{property.occupancyRate}</p>
+        </div>
+        <div className="bg-gray-100 p-2 rounded">
+          <p className="text-xs text-gray-500">Overdue</p>
+          <p className="font-medium">{property.overduePayments}</p>
+        </div>
+        <div className="bg-gray-100 p-2 rounded">
+          <p className="text-xs text-gray-500">Check-ins</p>
+          <p className="font-medium">{property.upcomingCheckIns}</p>
+        </div>
+      </div>
+      <Link 
+        to={`/dashboard/property/${property.id}`}
+        className="flex items-center text-[#7FD1C7] text-sm font-medium hover:underline"
+      >
+        View Details
+        <ArrowRight className="h-4 w-4 ml-1" />
+      </Link>
+    </Card>
+  );
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-semibold text-white mb-6">Dashboard Overview</h1>
@@ -94,44 +156,7 @@ export default function DashboardHome() {
       {/* Properties Overview Section */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-white mb-4">Properties Overview</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {properties.map((property) => (
-            <Card key={property.id} className="p-4 bg-white hover:shadow-lg transition-shadow">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h3 className="font-semibold text-lg">{property.name}</h3>
-                  <p className="text-gray-500 text-sm">{property.location}</p>
-                </div>
-                <House className="h-5 w-5 text-[#7FD1C7]" />
-              </div>
-              <div className="grid grid-cols-2 gap-2 mb-3">
-                <div className="bg-gray-100 p-2 rounded">
-                  <p className="text-xs text-gray-500">Units</p>
-                  <p className="font-medium">{property.units}</p>
-                </div>
-                <div className="bg-gray-100 p-2 rounded">
-                  <p className="text-xs text-gray-500">Occupancy</p>
-                  <p className="font-medium">{property.occupancyRate}</p>
-                </div>
-                <div className="bg-gray-100 p-2 rounded">
-                  <p className="text-xs text-gray-500">Overdue</p>
-                  <p className="font-medium">{property.overduePayments}</p>
-                </div>
-                <div className="bg-gray-100 p-2 rounded">
-                  <p className="text-xs text-gray-500">Check-ins</p>
-                  <p className="font-medium">{property.upcomingCheckIns}</p>
-                </div>
-              </div>
-              <Link 
-                to={`/dashboard/property/${property.id}`}
-                className="flex items-center text-[#7FD1C7] text-sm font-medium hover:underline"
-              >
-                View Details
-                <ArrowRight className="h-4 w-4 ml-1" />
-              </Link>
-            </Card>
-          ))}
-        </div>
+        {isMobile ? <PropertiesCarousel /> : <PropertiesGrid />}
       </div>
       
       {/* Original Stats Section */}
