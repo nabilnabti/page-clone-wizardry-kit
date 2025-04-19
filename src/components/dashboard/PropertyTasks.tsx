@@ -1,7 +1,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ListTodo, Calendar, Check, Plus } from "lucide-react";
+import { ListTodo, Calendar, Check, Plus, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CleaningTaskRotation } from "./CleaningTaskRotation";
 import { useState } from "react";
@@ -17,109 +17,79 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getCleaningTasksByProperty, addCleaningTask, updateCleaningTask } from "@/services/cleaningService";
+import { getTenantsByProperty } from "@/services/tenantService";
 
-// Mock data - in a real app this would come from an API
-const tasksByProperty = {
-  "1": [
-    { 
-      id: 1,
-      title: "Nettoyage de la cuisine",
-      description: "Nettoyer les équipements, les sols et les surfaces de la cuisine commune",
-      assignedTo: "Thomas Martin",
-      dueDate: "April 26, 2025",
-      status: "pending"
-    },
-    { 
-      id: 2,
-      title: "Nettoyage des salles de bain",
-      description: "Nettoyer les douches, lavabos et toilettes des salles de bain communes",
-      assignedTo: "Sarah Johnson",
-      dueDate: "April 28, 2025",
-      status: "pending"
-    },
-    { 
-      id: 3,
-      title: "Sortir les poubelles",
-      description: "Vider toutes les poubelles et les amener aux conteneurs",
-      assignedTo: "Thomas Martin",
-      dueDate: "April 24, 2025",
-      status: "completed"
-    },
-  ],
-  "2": [
-    { 
-      id: 4,
-      title: "Nettoyage du salon",
-      description: "Aspirer, dépoussiérer et ranger le salon commun",
-      assignedTo: "Michael Brown",
-      dueDate: "April 25, 2025",
-      status: "pending"
-    },
-  ],
-  "3": [
-    { 
-      id: 5,
-      title: "Nettoyage de l'entrée",
-      description: "Nettoyer le hall d'entrée et les escaliers",
-      assignedTo: "Nina Garcia",
-      dueDate: "April 27, 2025",
-      status: "pending"
-    },
-    { 
-      id: 6,
-      title: "Nettoyage du balcon",
-      description: "Nettoyer et ranger le balcon commun",
-      assignedTo: "Alex Chen",
-      dueDate: "April 30, 2025",
-      status: "pending"
-    },
-    { 
-      id: 7,
-      title: "Entretien du jardin",
-      description: "Tondre la pelouse et arroser les plantes",
-      assignedTo: "Laura Smith",
-      dueDate: "May 2, 2025",
-      status: "pending"
-    },
-    { 
-      id: 8,
-      title: "Nettoyage machine à laver",
-      description: "Nettoyer les filtres et l'intérieur des machines à laver",
-      assignedTo: "Nina Garcia",
-      dueDate: "April 22, 2025",
-      status: "completed"
-    },
-  ]
-};
-
-// Sample data for tenants by property
-const tenantsByProperty = {
-  "1": [
-    { id: 1, name: "Thomas Martin" },
-    { id: 2, name: "Sarah Johnson" },
-  ],
-  "2": [
-    { id: 3, name: "Michael Brown" },
-    { id: 4, name: "Emma Wilson" },
-    { id: 5, name: "David Lee" },
-  ],
-  "3": [
-    { id: 6, name: "Nina Garcia" },
-    { id: 7, name: "Alex Chen" },
-    { id: 8, name: "Laura Smith" },
-  ]
-};
-
-export function PropertyTasks({ propertyId }: { propertyId: string }) {
-  const [tasks, setTasks] = useState(tasksByProperty[propertyId] || []);
-  const pendingTasks = tasks.filter(task => task.status === "pending");
-  const completedTasks = tasks.filter(task => task.status === "completed");
-  
+export function PropertyTasks({ propertyId }: { propertyId?: string }) {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [newTaskAssignee, setNewTaskAssignee] = useState("");
-  const { toast } = useToast();
+
+  const { data: tasks = [], isLoading: isLoadingTasks } = useQuery({
+    queryKey: ['cleaningTasks', propertyId],
+    queryFn: () => getCleaningTasksByProperty(propertyId || ''),
+    enabled: !!propertyId
+  });
+
+  const { data: tenants = [], isLoading: isLoadingTenants } = useQuery({
+    queryKey: ['tenants', propertyId],
+    queryFn: () => getTenantsByProperty(propertyId || ''),
+    enabled: !!propertyId
+  });
+
+  const pendingTasks = tasks.filter(task => task.status === "pending");
+  const completedTasks = tasks.filter(task => task.status === "completed");
+
+  const addTaskMutation = useMutation({
+    mutationFn: (newTask: any) => addCleaningTask(newTask),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cleaningTasks', propertyId] });
+      toast({
+        title: "Tâche ajoutée",
+        description: "La nouvelle tâche a été ajoutée avec succès."
+      });
+      setIsAddTaskOpen(false);
+      resetForm();
+    },
+    onError: (error) => {
+      console.error("Error adding task:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ajouter la tâche.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const updateTaskMutation = useMutation({
+    mutationFn: ({ taskId, updates }: { taskId: string; updates: any }) => 
+      updateCleaningTask(taskId, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cleaningTasks', propertyId] });
+      toast({
+        title: "Tâche terminée",
+        description: "La tâche a été marquée comme terminée."
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating task:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour la tâche.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const resetForm = () => {
+    setNewTaskTitle("");
+    setNewTaskDescription("");
+    setNewTaskAssignee("");
+  };
 
   const handleAddTask = () => {
     if (!newTaskTitle || !newTaskAssignee) {
@@ -131,41 +101,35 @@ export function PropertyTasks({ propertyId }: { propertyId: string }) {
       return;
     }
 
+    const assignedTenant = tenants.find(tenant => tenant.name === newTaskAssignee);
+
     const newTask = {
-      id: Math.max(0, ...tasks.map(t => t.id)) + 1,
       title: newTaskTitle,
       description: newTaskDescription,
       assignedTo: newTaskAssignee,
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }),
+      assignedTenantId: assignedTenant?.id,
+      propertyId: propertyId,
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       status: "pending"
     };
 
-    setTasks([...tasks, newTask]);
-    setNewTaskTitle("");
-    setNewTaskDescription("");
-    setNewTaskAssignee("");
-    setIsAddTaskOpen(false);
-    
-    toast({
-      title: "Tâche ajoutée",
-      description: "La nouvelle tâche a été ajoutée avec succès."
+    addTaskMutation.mutate(newTask);
+  };
+
+  const handleMarkAsCompleted = (taskId: string) => {
+    updateTaskMutation.mutate({
+      taskId,
+      updates: { status: "completed", completedAt: new Date().toISOString() }
     });
   };
 
-  const handleMarkAsCompleted = (taskId: number) => {
-    setTasks(tasks.map(task => 
-      task.id === taskId ? { ...task, status: "completed" } : task
-    ));
-    
-    toast({
-      title: "Tâche terminée",
-      description: "La tâche a été marquée comme terminée."
-    });
-  };
+  if (isLoadingTasks || isLoadingTenants) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-[#7FD1C7]" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -230,7 +194,7 @@ export function PropertyTasks({ propertyId }: { propertyId: string }) {
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
                       <option value="">Sélectionner un locataire</option>
-                      {tenantsByProperty[propertyId]?.map((tenant) => (
+                      {tenants.map((tenant) => (
                         <option key={tenant.id} value={tenant.name}>
                           {tenant.name}
                         </option>
@@ -240,7 +204,14 @@ export function PropertyTasks({ propertyId }: { propertyId: string }) {
                 </div>
                 
                 <DialogFooter>
-                  <Button onClick={handleAddTask} className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
+                  <Button 
+                    onClick={handleAddTask} 
+                    className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]"
+                    disabled={addTaskMutation.isPending}
+                  >
+                    {addTaskMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : null}
                     Ajouter la tâche
                   </Button>
                 </DialogFooter>
@@ -268,15 +239,20 @@ export function PropertyTasks({ propertyId }: { propertyId: string }) {
                         size="sm" 
                         className="h-8 w-8 p-0"
                         onClick={() => handleMarkAsCompleted(task.id)}
+                        disabled={updateTaskMutation.isPending}
                       >
-                        <Check className="h-4 w-4 text-[#7FD1C7]" />
+                        {updateTaskMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin text-[#7FD1C7]" />
+                        ) : (
+                          <Check className="h-4 w-4 text-[#7FD1C7]" />
+                        )}
                       </Button>
                     </div>
                     <p className="text-sm text-gray-400 mb-3">{task.description}</p>
                     <div className="flex justify-between text-sm">
                       <div className="flex items-center text-gray-400">
                         <Calendar className="h-4 w-4 mr-1" />
-                        {task.dueDate}
+                        {new Date(task.dueDate).toLocaleDateString()}
                       </div>
                       <span className="text-[#7FD1C7]">{task.assignedTo}</span>
                     </div>
@@ -302,7 +278,7 @@ export function PropertyTasks({ propertyId }: { propertyId: string }) {
                     <div className="flex justify-between text-sm">
                       <div className="flex items-center text-gray-400">
                         <Calendar className="h-4 w-4 mr-1" />
-                        {task.dueDate}
+                        {new Date(task.dueDate).toLocaleDateString()}
                       </div>
                       <span className="text-gray-400">{task.assignedTo}</span>
                     </div>

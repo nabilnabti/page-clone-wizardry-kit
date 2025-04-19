@@ -10,53 +10,47 @@ import {
   House, 
   Check, 
   Clock, 
-  CalendarDays
+  CalendarDays,
+  Loader2
 } from "lucide-react";
 import { PropertyTenants } from "@/components/dashboard/PropertyTenants";
 import { PropertyTasks } from "@/components/dashboard/PropertyTasks";
-
-// Mock data - in a real app this would come from an API
-const properties = [
-  { 
-    id: "1", 
-    name: "123 Main Street", 
-    location: "San Francisco",
-    address: "123 Main Street, San Francisco, CA 94107",
-    cleaningTasksRemaining: 3,
-    occupancy: "2/6",
-    overduePayments: 2,
-    upcomingCheckIns: 1,
-    roomCount: 6
-  },
-  { 
-    id: "2", 
-    name: "456 Park Avenue", 
-    location: "New York",
-    address: "456 Park Avenue, New York, NY 10022",
-    cleaningTasksRemaining: 1,
-    occupancy: "6/6",
-    overduePayments: 0,
-    upcomingCheckIns: 2,
-    roomCount: 6
-  },
-  { 
-    id: "3", 
-    name: "789 Beach Road", 
-    location: "Los Angeles",
-    address: "789 Beach Road, Los Angeles, CA 90001",
-    cleaningTasksRemaining: 4,
-    occupancy: "3/8",
-    overduePayments: 2,
-    upcomingCheckIns: 6,
-    roomCount: 8
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { getProperty } from "@/services/propertyService";
+import { getTenantsByProperty } from "@/services/tenantService";
+import { getCleaningTasksByProperty } from "@/services/cleaningService";
 
 export default function PropertyDetail() {
-  const { propertyId } = useParams();
+  const { propertyId } = useParams<{ propertyId: string }>();
   const navigate = useNavigate();
   
-  const property = properties.find(p => p.id === propertyId);
+  const { data: property, isLoading: isLoadingProperty } = useQuery({
+    queryKey: ['property', propertyId],
+    queryFn: () => getProperty(propertyId || ''),
+    enabled: !!propertyId
+  });
+  
+  const { data: tenants = [], isLoading: isLoadingTenants } = useQuery({
+    queryKey: ['tenants', propertyId],
+    queryFn: () => getTenantsByProperty(propertyId || ''),
+    enabled: !!propertyId
+  });
+  
+  const { data: cleaningTasks = [], isLoading: isLoadingTasks } = useQuery({
+    queryKey: ['cleaningTasks', propertyId],
+    queryFn: () => getCleaningTasksByProperty(propertyId || ''),
+    enabled: !!propertyId
+  });
+
+  const isLoading = isLoadingProperty || isLoadingTenants || isLoadingTasks;
+  
+  if (isLoading) {
+    return (
+      <div className="p-6 flex justify-center items-center min-h-[300px]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#7FD1C7]" />
+      </div>
+    );
+  }
   
   if (!property) {
     return (
@@ -71,10 +65,12 @@ export default function PropertyDetail() {
     );
   }
 
-  const occupancyData = property.occupancy.split('/');
-  const currentOccupants = parseInt(occupancyData[0]);
-  const totalRooms = parseInt(occupancyData[1]);
+  const currentOccupants = tenants.length;
+  const totalRooms = property.rooms || 0;
   const vacantRooms = totalRooms - currentOccupants;
+  const pendingTasks = cleaningTasks.filter(task => task.status === 'pending').length;
+  const overduePayments = 0; // À implémenter avec les données réelles de paiement
+  const upcomingCheckIns = 0; // À implémenter avec les données réelles d'arrivées
 
   return (
     <div className="p-6">
@@ -100,11 +96,11 @@ export default function PropertyDetail() {
             <div className="grid grid-cols-2 gap-2">
               <div className="bg-gray-100 p-2 rounded">
                 <p className="text-xs text-gray-500">Chambres</p>
-                <p className="font-medium">{property.roomCount}</p>
+                <p className="font-medium">{totalRooms}</p>
               </div>
               <div className="bg-gray-100 p-2 rounded">
                 <p className="text-xs text-gray-500">Occupées</p>
-                <p className="font-medium">{property.occupancy}</p>
+                <p className="font-medium">{currentOccupants}/{totalRooms}</p>
               </div>
               <div className="bg-gray-100 p-2 rounded">
                 <p className="text-xs text-gray-500">Disponibles</p>
@@ -112,7 +108,7 @@ export default function PropertyDetail() {
               </div>
               <div className="bg-gray-100 p-2 rounded">
                 <p className="text-xs text-gray-500">Paiements</p>
-                <p className="font-medium">{property.overduePayments} en retard</p>
+                <p className="font-medium">{overduePayments} en retard</p>
               </div>
             </div>
           </CardContent>
@@ -127,12 +123,12 @@ export default function PropertyDetail() {
             <div className="flex flex-col space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm">Tâches restantes</span>
-                <span className="font-medium">{property.cleaningTasksRemaining}</span>
+                <span className="font-medium">{pendingTasks}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
                   className="bg-[#7FD1C7] h-2 rounded-full" 
-                  style={{ width: `${(property.cleaningTasksRemaining / 10) * 100}%` }}
+                  style={{ width: `${pendingTasks > 0 ? (pendingTasks / (pendingTasks + 5)) * 100 : 0}%` }}
                 ></div>
               </div>
             </div>
@@ -148,7 +144,7 @@ export default function PropertyDetail() {
             <div className="space-y-3">
               <div className="flex items-center text-sm">
                 <CalendarDays className="h-4 w-4 mr-2 text-gray-400" />
-                <span>{property.upcomingCheckIns} arrivées prévues</span>
+                <span>{upcomingCheckIns} arrivées prévues</span>
               </div>
               <div className="flex items-center text-sm">
                 <Users className="h-4 w-4 mr-2 text-gray-400" />
@@ -156,7 +152,7 @@ export default function PropertyDetail() {
               </div>
               <div className="flex items-center text-sm">
                 <ListTodo className="h-4 w-4 mr-2 text-gray-400" />
-                <span>{property.cleaningTasksRemaining} tâches à nettoyer</span>
+                <span>{pendingTasks} tâches à nettoyer</span>
               </div>
             </div>
           </CardContent>

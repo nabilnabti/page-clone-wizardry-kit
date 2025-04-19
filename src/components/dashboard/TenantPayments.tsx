@@ -1,109 +1,43 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, CreditCard, AlertCircle, Calendar, Receipt, FileText } from "lucide-react";
+import { Check, CreditCard, AlertCircle, Calendar, Receipt, FileText, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
-// Mock data - in a real app this would come from an API
-const paymentsByTenant = {
-  "1": [
-    {
-      id: 1,
-      date: "April 15, 2025",
-      dueDate: "April 15, 2025",
-      amount: "€250",
-      status: "paid",
-      method: "Virement bancaire",
-      reference: "REF123456"
-    },
-    {
-      id: 2,
-      date: "April 8, 2025",
-      dueDate: "April 8, 2025",
-      amount: "€250",
-      status: "paid",
-      method: "Virement bancaire",
-      reference: "REF123455"
-    },
-    {
-      id: 3,
-      date: "April 1, 2025",
-      dueDate: "April 1, 2025",
-      amount: "€250",
-      status: "paid",
-      method: "Virement bancaire",
-      reference: "REF123454"
-    },
-    {
-      id: 4,
-      date: "",
-      dueDate: "April 22, 2025",
-      amount: "€250",
-      status: "pending",
-      method: "",
-      reference: ""
-    },
-  ],
-  "2": [
-    {
-      id: 5,
-      date: "April 1, 2025",
-      dueDate: "April 1, 2025",
-      amount: "€800",
-      status: "paid",
-      method: "Carte bancaire",
-      reference: "CB987654"
-    },
-    {
-      id: 6,
-      date: "March 1, 2025",
-      dueDate: "March 1, 2025",
-      amount: "€800",
-      status: "paid",
-      method: "Carte bancaire",
-      reference: "CB987653"
-    },
-    {
-      id: 7,
-      date: "",
-      dueDate: "May 1, 2025",
-      amount: "€800",
-      status: "pending",
-      method: "",
-      reference: ""
-    },
-  ],
-  "3": [
-    {
-      id: 8,
-      date: "April 1, 2025",
-      dueDate: "April 1, 2025",
-      amount: "€850",
-      status: "paid",
-      method: "Virement bancaire",
-      reference: "REF567890"
-    },
-    {
-      id: 9,
-      date: "",
-      dueDate: "May 1, 2025",
-      amount: "€850",
-      status: "pending",
-      method: "",
-      reference: ""
-    },
-  ],
-};
-
+// Ce composant sera mis à jour ultérieurement pour intégrer les paiements réels
 export function TenantPayments({ tenantId }: { tenantId: string }) {
-  const payments = paymentsByTenant[tenantId] || [];
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Simulons un appel API avec useState pour le moment
+  // Dans une implémentation réelle, cela viendrait de Firestore
+  const [payments, setPayments] = useState<any[]>([]);
+  
   const paidPayments = payments.filter(payment => payment.status === "paid");
   const pendingPayments = payments.filter(payment => payment.status === "pending");
   
-  // Calculate total paid and pending amounts
+  // Calculer les totaux
   const totalPaid = paidPayments.reduce((sum, payment) => 
     sum + parseFloat(payment.amount.replace('€', '')), 0);
   const totalPending = pendingPayments.reduce((sum, payment) => 
     sum + parseFloat(payment.amount.replace('€', '')), 0);
+
+  // Simuler un chargement initial
+  useState(() => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-[#7FD1C7]" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -143,72 +77,91 @@ export function TenantPayments({ tenantId }: { tenantId: string }) {
         </Button>
       </div>
       
-      {pendingPayments.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-lg font-medium text-white mb-3">Paiements à venir</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {pendingPayments.map((payment) => (
-              <Card key={payment.id} className="bg-white overflow-hidden">
-                <div className="bg-amber-50 px-4 py-2 border-b border-amber-100 flex justify-between items-center">
-                  <div className="flex items-center">
-                    <AlertCircle className="h-4 w-4 text-amber-500 mr-2" />
-                    <span className="font-medium text-amber-800">En attente</span>
-                  </div>
-                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                    Échéance: {payment.dueDate}
-                  </Badge>
-                </div>
-                <CardContent className="pt-4">
-                  <div className="flex justify-between mb-2">
-                    <div>
-                      <p className="text-sm text-gray-500">Montant</p>
-                      <p className="text-xl font-semibold">{payment.amount}</p>
-                    </div>
-                    <Button variant="outline" className="border-[#7FD1C7] text-[#7FD1C7] hover:bg-[#7FD1C7]/10">
-                      Marquer comme payé
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      <div>
-        <h3 className="text-lg font-medium text-white mb-3">Paiements effectués</h3>
-        <div className="bg-white rounded-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50 text-left">
-                  <th className="px-4 py-3 text-sm font-medium text-gray-500">Date</th>
-                  <th className="px-4 py-3 text-sm font-medium text-gray-500">Montant</th>
-                  <th className="px-4 py-3 text-sm font-medium text-gray-500">Méthode</th>
-                  <th className="px-4 py-3 text-sm font-medium text-gray-500">Référence</th>
-                  <th className="px-4 py-3 text-sm font-medium text-gray-500">Statut</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {paidPayments.map((payment) => (
-                  <tr key={payment.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">{payment.date}</td>
-                    <td className="px-4 py-3 font-medium">{payment.amount}</td>
-                    <td className="px-4 py-3">{payment.method}</td>
-                    <td className="px-4 py-3 text-sm text-gray-500">{payment.reference}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center text-green-600">
-                        <Check className="h-4 w-4 mr-1" />
-                        Payé
+      {pendingPayments.length === 0 && paidPayments.length === 0 ? (
+        <Card className="p-8 bg-[#242E3E] border-none shadow-md text-center">
+          <CreditCard className="h-12 w-12 mx-auto mb-4 text-gray-500" />
+          <h3 className="text-white text-lg font-medium mb-2">Aucun paiement</h3>
+          <p className="text-gray-400 mb-6">Ce locataire n'a pas encore de paiements enregistrés.</p>
+          <Button className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533] mx-auto">
+            Ajouter un premier paiement
+          </Button>
+        </Card>
+      ) : (
+        <>
+          {pendingPayments.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-white mb-3">Paiements à venir</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {pendingPayments.map((payment) => (
+                  <Card key={payment.id} className="bg-white overflow-hidden">
+                    <div className="bg-amber-50 px-4 py-2 border-b border-amber-100 flex justify-between items-center">
+                      <div className="flex items-center">
+                        <AlertCircle className="h-4 w-4 text-amber-500 mr-2" />
+                        <span className="font-medium text-amber-800">En attente</span>
                       </div>
-                    </td>
-                  </tr>
+                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                        Échéance: {new Date(payment.dueDate).toLocaleDateString()}
+                      </Badge>
+                    </div>
+                    <CardContent className="pt-4">
+                      <div className="flex justify-between mb-2">
+                        <div>
+                          <p className="text-sm text-gray-500">Montant</p>
+                          <p className="text-xl font-semibold">{payment.amount}</p>
+                        </div>
+                        <Button variant="outline" className="border-[#7FD1C7] text-[#7FD1C7] hover:bg-[#7FD1C7]/10">
+                          Marquer comme payé
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+              </div>
+            </div>
+          )}
+          
+          {paidPayments.length > 0 ? (
+            <div>
+              <h3 className="text-lg font-medium text-white mb-3">Paiements effectués</h3>
+              <div className="bg-white rounded-md overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-gray-50 text-left">
+                        <th className="px-4 py-3 text-sm font-medium text-gray-500">Date</th>
+                        <th className="px-4 py-3 text-sm font-medium text-gray-500">Montant</th>
+                        <th className="px-4 py-3 text-sm font-medium text-gray-500">Méthode</th>
+                        <th className="px-4 py-3 text-sm font-medium text-gray-500">Référence</th>
+                        <th className="px-4 py-3 text-sm font-medium text-gray-500">Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {paidPayments.map((payment) => (
+                        <tr key={payment.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3">{new Date(payment.date).toLocaleDateString()}</td>
+                          <td className="px-4 py-3 font-medium">{payment.amount}</td>
+                          <td className="px-4 py-3">{payment.method}</td>
+                          <td className="px-4 py-3 text-sm text-gray-500">{payment.reference}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center text-green-600">
+                              <Check className="h-4 w-4 mr-1" />
+                              Payé
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center text-gray-400 mt-4">
+              Aucun paiement effectué
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
