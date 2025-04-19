@@ -1,9 +1,10 @@
+
 import { Card } from "@/components/ui/card";
 import { Users, Calendar, CreditCard, AlertTriangle, House, ArrowRight } from "lucide-react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import * as React from "react";
 
 // Sample properties data - in a real app this would come from an API
@@ -39,7 +40,7 @@ const properties = [
 
 export default function DashboardHome() {
   const isMobile = useIsMobile();
-  const [api, setApi] = React.useState();
+  const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
 
   React.useEffect(() => {
