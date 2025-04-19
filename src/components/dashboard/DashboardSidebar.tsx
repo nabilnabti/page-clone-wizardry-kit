@@ -1,8 +1,9 @@
+
 import { Building, Home, FileText, House, CreditCard, Users, Package, ChevronDown, Calendar } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { useNavigate, useLocation } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getPropertiesByLandlord } from "@/services/propertyService";
 import { useAuth } from "@/context/AuthContext";
@@ -50,10 +51,25 @@ export function DashboardSidebar() {
     enabled: !!user?.uid
   });
 
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  // Get selected property from localStorage on initial load
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(() => {
+    const savedProperty = localStorage.getItem('selectedProperty');
+    return savedProperty ? JSON.parse(savedProperty) : null;
+  });
+
+  // Set initial property if none is selected and properties are loaded
+  useEffect(() => {
+    if (!selectedProperty && properties.length > 0) {
+      handlePropertyChange(properties[0]);
+    }
+  }, [properties]);
 
   const handlePropertyChange = (property: Property) => {
     setSelectedProperty(property);
+    localStorage.setItem('selectedProperty', JSON.stringify(property));
+    
+    // Also update user context or localStorage for other components to access
+    localStorage.setItem('currentPropertyId', property.id);
   };
 
   const handleAddNewProperty = () => {

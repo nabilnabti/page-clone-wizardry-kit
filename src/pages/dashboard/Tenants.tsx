@@ -7,19 +7,30 @@ import { useQuery } from "@tanstack/react-query";
 import { getTenantsByProperty } from "@/services/tenantService";
 import { useAuth } from "@/context/AuthContext";
 import { AddTenantDialog } from "@/components/dashboard/AddTenantDialog";
+import { useEffect, useState } from "react";
 
 export default function Tenants() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [currentPropertyId, setCurrentPropertyId] = useState<string | null>(null);
+  
+  // Get the property ID from localStorage on component mount
+  useEffect(() => {
+    const storedPropertyId = localStorage.getItem('currentPropertyId');
+    setCurrentPropertyId(storedPropertyId);
+  }, []);
+  
+  // Priority: 1. localStorage propertyId, 2. user.propertyId
+  const activePropertyId = currentPropertyId || user?.propertyId;
   
   const {
     data: tenants = [],
     isLoading,
     refetch
   } = useQuery({
-    queryKey: ['tenants', user?.propertyId],
-    queryFn: () => getTenantsByProperty(user?.propertyId || ''),
-    enabled: !!user?.propertyId
+    queryKey: ['tenants', activePropertyId],
+    queryFn: () => getTenantsByProperty(activePropertyId || ''),
+    enabled: !!activePropertyId
   });
   
   const handleTenantClick = (tenantId: string) => {
@@ -51,7 +62,7 @@ export default function Tenants() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-white">Locataires</h1>
         <AddTenantDialog 
-          propertyId={user?.propertyId} 
+          propertyId={activePropertyId || undefined} 
           onTenantAdded={() => refetch()} 
         />
       </div>

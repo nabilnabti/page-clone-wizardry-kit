@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,8 +28,16 @@ export function AddTenantDialog({ propertyId, onTenantAdded }: AddTenantDialogPr
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [currentPropertyId, setCurrentPropertyId] = useState<string | null>(null);
 
-  const activePropertyId = propertyId || user?.propertyId;
+  // Get the property ID from localStorage on component mount and when it changes
+  useEffect(() => {
+    const storedPropertyId = localStorage.getItem('currentPropertyId');
+    setCurrentPropertyId(storedPropertyId);
+  }, [propertyId]);
+
+  // Priority: 1. Passed propertyId prop, 2. localStorage propertyId, 3. user.propertyId
+  const activePropertyId = propertyId || currentPropertyId || user?.propertyId;
   const inviteLink = activePropertyId ? `https://yourapp.com/join/${activePropertyId}/${btoa(email)}` : '';
 
   const handleButtonClick = () => {

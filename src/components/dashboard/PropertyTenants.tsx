@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { User, Mail, Phone, UserPlus } from "lucide-react";
@@ -7,12 +6,22 @@ import { getTenantsByProperty } from "@/services/tenantService";
 import { Loader2 } from "lucide-react";
 import { AddTenantDialog } from "./AddTenantDialog";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 export function PropertyTenants({ propertyId }: { propertyId?: string }) {
+  const [currentPropertyId, setCurrentPropertyId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const storedPropertyId = localStorage.getItem('currentPropertyId');
+    setCurrentPropertyId(storedPropertyId);
+  }, [propertyId]);
+  
+  const activePropertyId = propertyId || currentPropertyId;
+  
   const { data: tenants = [], isLoading, refetch } = useQuery({
-    queryKey: ['tenants', propertyId],
-    queryFn: () => getTenantsByProperty(propertyId || ''),
-    enabled: !!propertyId
+    queryKey: ['tenants', activePropertyId],
+    queryFn: () => getTenantsByProperty(activePropertyId || ''),
+    enabled: !!activePropertyId
   });
 
   if (isLoading) {
@@ -28,7 +37,7 @@ export function PropertyTenants({ propertyId }: { propertyId?: string }) {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-white">Locataires</h2>
         <AddTenantDialog 
-          propertyId={propertyId} 
+          propertyId={activePropertyId || undefined} 
           onTenantAdded={() => refetch()} 
         />
       </div>
