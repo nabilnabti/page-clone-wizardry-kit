@@ -18,6 +18,7 @@ import TenantPayments from "./pages/tenant/TenantPayments";
 import TenantCleaning from "./pages/tenant/TenantCleaning";
 import TenantChat from "./pages/tenant/TenantChat";
 import TenantProfile from "./pages/tenant/TenantProfile";
+import CleaningTasks from "./pages/dashboard/CleaningTasks";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route index element={<DashboardHome />} />
             <Route path="tenants" element={<Tenants />} />
             <Route path="payments" element={<Payments />} />
+            <Route path="cleaning-tasks" element={<CleaningTasks />} />
             <Route path="house-rules" element={<HouseRules />} />
             <Route path="subletting-rules" element={<SublettingRules />} />
             <Route path="subscriptions" element={<Subscriptions />} />
