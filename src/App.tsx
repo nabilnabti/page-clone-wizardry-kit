@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +17,7 @@ import TenantDashboard from "./pages/tenant/TenantDashboard";
 import TenantPayments from "./pages/tenant/TenantPayments";
 import TenantCleaning from "./pages/tenant/TenantCleaning";
 import TenantChat from "./pages/tenant/TenantChat";
+import TenantProfile from "./pages/tenant/TenantProfile";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +42,7 @@ const App = () => (
           <Route path="/tenant/payments" element={<TenantPayments />} />
           <Route path="/tenant/cleaning" element={<TenantCleaning />} />
           <Route path="/tenant/chat" element={<TenantChat />} />
+          <Route path="/tenant/profile" element={<TenantProfile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
