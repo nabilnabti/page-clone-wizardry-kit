@@ -7,27 +7,70 @@ import { Loader2 } from "lucide-react";
 import { AddTenantDialog } from "./AddTenantDialog";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { toast } from "@/hooks/use-toast";
 
 export function PropertyTenants({ propertyId }: { propertyId?: string }) {
   const [currentPropertyId, setCurrentPropertyId] = useState<string | null>(null);
   
   useEffect(() => {
+    if (propertyId) {
+      setCurrentPropertyId(propertyId);
+      return;
+    }
+    
     const storedPropertyId = localStorage.getItem('currentPropertyId');
-    setCurrentPropertyId(storedPropertyId);
+    if (storedPropertyId) {
+      setCurrentPropertyId(storedPropertyId);
+    }
   }, [propertyId]);
   
   const activePropertyId = propertyId || currentPropertyId;
   
-  const { data: tenants = [], isLoading, refetch } = useQuery({
+  const { data: tenants = [], isLoading, refetch, isError } = useQuery({
     queryKey: ['tenants', activePropertyId],
     queryFn: () => getTenantsByProperty(activePropertyId || ''),
-    enabled: !!activePropertyId
+    enabled: !!activePropertyId,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+    onError: (error) => {
+      console.error("Error fetching tenants:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les locataires pour cette propriété",
+        variant: "destructive",
+      });
+    }
   });
+
+  if (!activePropertyId) {
+    return (
+      <div className="p-8 bg-[#242E3E] border-none shadow-md text-center">
+        <User className="h-12 w-12 mx-auto mb-4 text-gray-500" />
+        <h3 className="text-white text-lg font-medium mb-2">Aucune propriété sélectionnée</h3>
+        <p className="text-gray-400 mb-6">Veuillez sélectionner une propriété dans le menu pour voir ses locataires.</p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
         <Loader2 className="h-8 w-8 animate-spin text-[#7FD1C7]" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-8 bg-[#242E3E] border-none shadow-md text-center">
+        <h3 className="text-white text-lg font-medium mb-2">Erreur de chargement</h3>
+        <p className="text-gray-400 mb-6">Une erreur s'est produite lors du chargement des locataires.</p>
+        <Button 
+          onClick={() => refetch()}
+          className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]"
+        >
+          Réessayer
+        </Button>
       </div>
     );
   }

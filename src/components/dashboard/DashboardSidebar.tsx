@@ -9,6 +9,7 @@ import { getPropertiesByLandlord } from "@/services/propertyService";
 import { useAuth } from "@/context/AuthContext";
 import { Property } from "@/types";
 import { Loader2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const menuItems = [{
   title: "Dashboard",
@@ -45,10 +46,20 @@ export function DashboardSidebar() {
   const location = useLocation();
   const { user } = useAuth();
   
-  const { data: properties = [], isLoading } = useQuery({
+  const { data: properties = [], isLoading, isError } = useQuery({
     queryKey: ['properties', user?.uid],
     queryFn: () => getPropertiesByLandlord(user?.uid || ''),
-    enabled: !!user?.uid
+    enabled: !!user?.uid,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1,
+    onError: (error) => {
+      console.error("Error fetching properties:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les propriétés",
+        variant: "destructive",
+      });
+    }
   });
 
   // Get selected property from localStorage on initial load
@@ -65,11 +76,20 @@ export function DashboardSidebar() {
   }, [properties]);
 
   const handlePropertyChange = (property: Property) => {
-    setSelectedProperty(property);
-    localStorage.setItem('selectedProperty', JSON.stringify(property));
+    console.log("Changing property to:", property.name, property.id);
     
-    // Also update user context or localStorage for other components to access
+    // Set the state
+    setSelectedProperty(property);
+    
+    // Store in localStorage for persistence across refreshes and components
+    localStorage.setItem('selectedProperty', JSON.stringify(property));
     localStorage.setItem('currentPropertyId', property.id);
+    
+    // Force refetch of data on property change if we're already on a page
+    if (location.pathname !== '/dashboard') {
+      // Force-reload the current page to refetch data with new property
+      navigate(location.pathname);
+    }
   };
 
   const handleAddNewProperty = () => {

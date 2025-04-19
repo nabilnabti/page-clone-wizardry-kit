@@ -11,7 +11,8 @@ import {
   Check, 
   Clock, 
   CalendarDays,
-  Loader2
+  Loader2,
+  AlertCircle
 } from "lucide-react";
 import { PropertyTenants } from "@/components/dashboard/PropertyTenants";
 import { PropertyTasks } from "@/components/dashboard/PropertyTasks";
@@ -19,27 +20,51 @@ import { useQuery } from "@tanstack/react-query";
 import { getProperty } from "@/services/propertyService";
 import { getTenantsByProperty } from "@/services/tenantService";
 import { getCleaningTasksByProperty } from "@/services/cleaningService";
+import { toast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 export default function PropertyDetail() {
   const { propertyId } = useParams<{ propertyId: string }>();
   const navigate = useNavigate();
   
-  const { data: property, isLoading: isLoadingProperty } = useQuery({
+  useEffect(() => {
+    if (!propertyId) {
+      toast({
+        title: "Erreur",
+        description: "ID de propriété non trouvé dans l'URL",
+        variant: "destructive",
+      });
+      navigate("/dashboard");
+    }
+  }, [propertyId, navigate]);
+  
+  const { data: property, isLoading: isLoadingProperty, error: propertyError } = useQuery({
     queryKey: ['property', propertyId],
     queryFn: () => getProperty(propertyId || ''),
-    enabled: !!propertyId
+    enabled: !!propertyId,
+    retry: 1,
+    onError: (error) => {
+      console.error("Error fetching property:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les détails de la propriété",
+        variant: "destructive",
+      });
+    }
   });
   
   const { data: tenants = [], isLoading: isLoadingTenants } = useQuery({
     queryKey: ['tenants', propertyId],
     queryFn: () => getTenantsByProperty(propertyId || ''),
-    enabled: !!propertyId
+    enabled: !!propertyId,
+    retry: 1
   });
   
   const { data: cleaningTasks = [], isLoading: isLoadingTasks } = useQuery({
     queryKey: ['cleaningTasks', propertyId],
     queryFn: () => getCleaningTasksByProperty(propertyId || ''),
-    enabled: !!propertyId
+    enabled: !!propertyId,
+    retry: 1
   });
 
   const isLoading = isLoadingProperty || isLoadingTenants || isLoadingTasks;
@@ -52,11 +77,13 @@ export default function PropertyDetail() {
     );
   }
   
-  if (!property) {
+  if (propertyError || !property) {
     return (
       <div className="p-6">
         <div className="text-center py-8">
+          <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
           <h2 className="text-2xl font-semibold text-white mb-2">Propriété non trouvée</h2>
+          <p className="text-gray-400 mb-4">Nous n'avons pas pu trouver cette propriété.</p>
           <Button onClick={() => navigate("/dashboard")}>
             Retour au Dashboard
           </Button>

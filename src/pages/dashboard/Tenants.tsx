@@ -1,41 +1,75 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, Edit, Trash, Mail, Phone, UserPlus } from "lucide-react";
+import { User, Edit, Trash, Mail, Phone, UserPlus, AlertCircle, House } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getTenantsByProperty } from "@/services/tenantService";
 import { useAuth } from "@/context/AuthContext";
 import { AddTenantDialog } from "@/components/dashboard/AddTenantDialog";
 import { useEffect, useState } from "react";
+import { toast } from "@/hooks/use-toast";
 
 export default function Tenants() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [currentPropertyId, setCurrentPropertyId] = useState<string | null>(null);
   
-  // Get the property ID from localStorage on component mount
+  // Get the property ID from localStorage on component mount and whenever it changes
   useEffect(() => {
     const storedPropertyId = localStorage.getItem('currentPropertyId');
-    setCurrentPropertyId(storedPropertyId);
-  }, []);
-  
-  // Priority: 1. localStorage propertyId, 2. user.propertyId
-  const activePropertyId = currentPropertyId || user?.propertyId;
+    if (storedPropertyId) {
+      setCurrentPropertyId(storedPropertyId);
+    } else if (user?.propertyId) {
+      // Fallback to user.propertyId if nothing in localStorage
+      setCurrentPropertyId(user.propertyId);
+    }
+  }, [user?.propertyId]);
   
   const {
     data: tenants = [],
     isLoading,
+    isError,
     refetch
   } = useQuery({
-    queryKey: ['tenants', activePropertyId],
-    queryFn: () => getTenantsByProperty(activePropertyId || ''),
-    enabled: !!activePropertyId
+    queryKey: ['tenants', currentPropertyId],
+    queryFn: () => getTenantsByProperty(currentPropertyId || ''),
+    enabled: !!currentPropertyId,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+    onError: (error) => {
+      console.error("Error fetching tenants:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les locataires pour cette propriété",
+        variant: "destructive",
+      });
+    }
   });
   
   const handleTenantClick = (tenantId: string) => {
     navigate(`/dashboard/tenant/${tenantId}`);
   };
+  
+  // Handle case when no property is selected
+  if (!currentPropertyId) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-semibold text-white mb-6">Locataires</h1>
+        <Card className="p-8 bg-[#242E3E] border-none shadow-md text-center">
+          <House className="h-12 w-12 mx-auto mb-4 text-gray-500" />
+          <h3 className="text-white text-lg font-medium mb-2">Aucune propriété sélectionnée</h3>
+          <p className="text-gray-400 mb-6">Veuillez sélectionner une propriété dans le menu pour voir ses locataires.</p>
+          <Button 
+            onClick={() => navigate("/dashboard/house-parameters/new")} 
+            className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]"
+          >
+            Créer une propriété
+          </Button>
+        </Card>
+      </div>
+    );
+  }
   
   if (isLoading) {
     return <div className="p-6">
@@ -58,11 +92,28 @@ export default function Tenants() {
       </div>;
   }
   
+  if (isError) {
+    return <div className="p-6">
+        <h1 className="text-2xl font-semibold text-white mb-6">Locataires</h1>
+        <Card className="p-8 bg-[#242E3E] border-none shadow-md text-center">
+          <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
+          <h3 className="text-white text-lg font-medium mb-2">Erreur de chargement</h3>
+          <p className="text-gray-400 mb-6">Une erreur s'est produite lors du chargement des locataires.</p>
+          <Button 
+            onClick={() => refetch()}
+            className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]"
+          >
+            Réessayer
+          </Button>
+        </Card>
+      </div>;
+  }
+  
   return <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-white">Locataires</h1>
         <AddTenantDialog 
-          propertyId={activePropertyId || undefined} 
+          propertyId={currentPropertyId} 
           onTenantAdded={() => refetch()} 
         />
       </div>
