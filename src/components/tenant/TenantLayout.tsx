@@ -1,5 +1,9 @@
 
+import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarHeader } from "@/components/ui/sidebar"
 import { TenantNavbar } from "./TenantNavbar";
+import { ChevronLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../ui/button";
 
 interface TenantLayoutProps {
   children: React.ReactNode;
@@ -8,34 +12,54 @@ interface TenantLayoutProps {
 }
 
 export function TenantLayout({ children, title, showBackButton }: TenantLayoutProps) {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen bg-[#1A2533]">
-      <div className="max-w-md mx-auto px-4 pb-20 md:max-w-4xl md:pb-12 md:px-8 lg:px-12">
-        <div className="md:flex md:gap-6">
-          {/* Only show this on desktop */}
-          <div className="hidden md:block md:w-52 md:pt-8">
-            <TenantNavbar />
-          </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-[#1A2533]">
+        <div className="hidden md:block">
+          <Sidebar variant="inset" collapsible="icon">
+            <SidebarContent>
+              <SidebarHeader className="p-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-[#7FD1C7] flex items-center justify-center text-white font-semibold">
+                    C
+                  </div>
+                  <span className="text-white font-semibold text-lg">COLIVE</span>
+                </div>
+              </SidebarHeader>
+              <SidebarGroup>
+                <TenantNavbar />
+              </SidebarGroup>
+            </SidebarContent>
+          </Sidebar>
+        </div>
+
+        <main className="flex-1 pb-20 md:pb-6 px-4 md:px-8">
+          <header className="flex items-center h-16 mb-6">
+            {showBackButton && (
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="mr-4 text-white hover:text-gray-300"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+            )}
+            <h1 className="text-xl text-white font-semibold md:text-2xl">{title}</h1>
+          </header>
           
-          <div className="flex-1">
-            <header className="flex items-center pt-6 pb-8 md:pt-8 md:pb-10">
-              {showBackButton && (
-                <button 
-                  onClick={() => window.history.back()}
-                  className="mr-4 text-white hover:text-gray-300"
-                >
-                  ←
-                </button>
-              )}
-              <h1 className="text-xl text-white font-semibold md:text-2xl">{title}</h1>
-            </header>
-            <div className="md:grid md:grid-cols-[repeat(auto-fit,minmax(300px,1fr))] md:gap-6">
-              {children}
-            </div>
+          <div className="md:max-w-5xl mx-auto">
+            {children}
           </div>
+        </main>
+
+        {/* Mobile navigation bar */}
+        <div className="md:hidden">
+          <TenantNavbar />
         </div>
       </div>
-      <TenantNavbar />
-    </div>
+    </SidebarProvider>
   );
 }
