@@ -3,6 +3,12 @@ import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHead
 import { useNavigate, useLocation } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getPropertiesByLandlord } from "@/services/propertyService";
+import { useAuth } from "@/context/AuthContext";
+import { Property } from "@/types";
+import { Loader2 } from "lucide-react";
+
 const menuItems = [{
   title: "Dashboard",
   icon: Home,
@@ -32,32 +38,28 @@ const menuItems = [{
   icon: Package,
   url: "/dashboard/subscriptions"
 }];
-const properties = [{
-  id: 1,
-  name: "123 Main Street",
-  units: 5,
-  city: "San Francisco"
-}, {
-  id: 2,
-  name: "456 Park Avenue",
-  units: 3,
-  city: "New York"
-}, {
-  id: 3,
-  name: "789 Beach Road",
-  units: 8,
-  city: "Los Angeles"
-}];
+
 export function DashboardSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [selectedProperty, setSelectedProperty] = useState(properties[0]);
-  const handlePropertyChange = property => {
+  const { user } = useAuth();
+  
+  const { data: properties = [], isLoading } = useQuery({
+    queryKey: ['properties', user?.uid],
+    queryFn: () => getPropertiesByLandlord(user?.uid || ''),
+    enabled: !!user?.uid
+  });
+
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+
+  const handlePropertyChange = (property: Property) => {
     setSelectedProperty(property);
   };
+
   const handleAddNewProperty = () => {
     navigate('/dashboard/house-parameters/new');
   };
+
   return <>
       <div className="hidden md:block">
         <Sidebar>
@@ -72,20 +74,37 @@ export function DashboardSidebar() {
                 <DropdownMenuTrigger className="w-full flex items-center justify-between rounded-md bg-[#2A3544] p-2 text-white hover:bg-[#3A4554] transition-colors">
                   <div className="flex items-center">
                     <House className="h-4 w-4 mr-2 text-[#7FD1C7]" />
-                    <span className="text-sm truncate">{selectedProperty.name}</span>
+                    <span className="text-sm truncate">
+                      {isLoading ? (
+                        <div className="flex items-center">
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Chargement...
+                        </div>
+                      ) : selectedProperty ? (
+                        selectedProperty.name
+                      ) : (
+                        "Sélectionner une propriété"
+                      )}
+                    </span>
                   </div>
                   <ChevronDown className="h-4 w-4 text-gray-400" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="start">
-                  {properties.map(property => <DropdownMenuItem key={property.id} className="flex items-center cursor-pointer" onClick={() => handlePropertyChange(property)}>
+                  {properties.map((property) => (
+                    <DropdownMenuItem 
+                      key={property.id} 
+                      className="flex items-center cursor-pointer" 
+                      onClick={() => handlePropertyChange(property)}
+                    >
                       <House className="h-4 w-4 mr-2 text-[#7FD1C7]" />
                       <div className="flex flex-col">
                         <span className="text-sm font-medium">{property.name}</span>
-                        <span className="text-xs text-gray-500">{property.city} - {property.units} units</span>
+                        <span className="text-xs text-gray-500">{property.address}</span>
                       </div>
-                    </DropdownMenuItem>)}
+                    </DropdownMenuItem>
+                  ))}
                   <DropdownMenuItem className="text-[#7FD1C7] cursor-pointer" onClick={handleAddNewProperty}>
-                    + Add New Property
+                    + Ajouter une propriété
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
