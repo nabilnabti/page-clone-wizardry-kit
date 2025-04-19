@@ -1,6 +1,5 @@
-
 import { Card } from "@/components/ui/card";
-import { Users, Calendar, CreditCard, AlertTriangle, House, ArrowRight } from "lucide-react";
+import { Users, Calendar, CreditCard, AlertTriangle, House, ArrowRight, ListTodo } from "lucide-react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -13,8 +12,8 @@ const properties = [
     id: 1, 
     name: "123 Main Street", 
     location: "San Francisco", 
-    units: 5, 
-    occupancyRate: "80%",
+    cleaningTasksRemaining: 3,
+    occupancy: "2/6",
     overduePayments: 2,
     upcomingCheckIns: 1
   },
@@ -22,8 +21,8 @@ const properties = [
     id: 2, 
     name: "456 Park Avenue", 
     location: "New York", 
-    units: 3, 
-    occupancyRate: "100%",
+    cleaningTasksRemaining: 1,
+    occupancy: "6/6",
     overduePayments: 0,
     upcomingCheckIns: 2
   },
@@ -31,8 +30,8 @@ const properties = [
     id: 3, 
     name: "789 Beach Road", 
     location: "Los Angeles", 
-    units: 8, 
-    occupancyRate: "75%",
+    cleaningTasksRemaining: 4,
+    occupancy: "3/8",
     overduePayments: 2,
     upcomingCheckIns: 6
   },
@@ -148,19 +147,25 @@ export default function DashboardHome() {
       </div>
       <div className="grid grid-cols-2 gap-2 mb-3">
         <div className="bg-gray-100 p-2 rounded">
-          <p className="text-xs text-gray-500">Units</p>
-          <p className="font-medium">{property.units}</p>
+          <div className="flex items-center gap-1">
+            <ListTodo className="h-4 w-4 text-gray-500" />
+            <p className="text-xs text-gray-500">À nettoyer</p>
+          </div>
+          <p className="font-medium">{property.cleaningTasksRemaining}</p>
         </div>
         <div className="bg-gray-100 p-2 rounded">
-          <p className="text-xs text-gray-500">Occupancy</p>
-          <p className="font-medium">{property.occupancyRate}</p>
+          <div className="flex items-center gap-1">
+            <Users className="h-4 w-4 text-gray-500" />
+            <p className="text-xs text-gray-500">Occupé</p>
+          </div>
+          <p className="font-medium">{property.occupancy}</p>
         </div>
         <div className="bg-gray-100 p-2 rounded">
-          <p className="text-xs text-gray-500">Overdue</p>
+          <p className="text-xs text-gray-500">Retards</p>
           <p className="font-medium">{property.overduePayments}</p>
         </div>
         <div className="bg-gray-100 p-2 rounded">
-          <p className="text-xs text-gray-500">Check-ins</p>
+          <p className="text-xs text-gray-500">Arrivées</p>
           <p className="font-medium">{property.upcomingCheckIns}</p>
         </div>
       </div>
@@ -168,7 +173,7 @@ export default function DashboardHome() {
         to={`/dashboard/property/${property.id}`}
         className="flex items-center text-[#7FD1C7] text-sm font-medium hover:underline"
       >
-        View Details
+        Voir détails
         <ArrowRight className="h-4 w-4 ml-1" />
       </Link>
     </Card>
