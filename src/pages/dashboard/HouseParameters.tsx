@@ -2,30 +2,96 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Save } from "lucide-react";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { Wifi, Key, Bed, House, Image } from "lucide-react";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface HouseParametersForm {
+  // Basic Information
   name: string;
+  description: string;
   address: string;
   price: number;
   maxOccupants: number;
   deposit: number;
   paymentFrequency: "monthly" | "quarterly" | "yearly";
+  
+  // Property Details
+  totalRooms: number;
+  bathrooms: number;
+  bedrooms: number;
+  propertyType: string;
+  floorNumber: number;
+  totalFloors: number;
+  surfaceArea: number;
+  
+  // Access Information
+  wifiNetwork: string;
+  wifiPassword: string;
+  buildingCode: string;
+  
+  // Facilities and Amenities
+  facilities: {
+    hasParking: boolean;
+    hasElevator: boolean;
+    hasAirConditioning: boolean;
+    hasHeating: boolean;
+    hasWasher: boolean;
+    hasDryer: boolean;
+    hasInternet: boolean;
+    hasTv: boolean;
+    hasKitchen: boolean;
+    hasWorkspace: boolean;
+  };
+  
+  // House Rules
+  smokingAllowed: boolean;
+  petsAllowed: boolean;
+  partiesAllowed: boolean;
+  
+  // Photos
+  photos: string[];
 }
 
 export default function HouseParameters() {
   const form = useForm<HouseParametersForm>({
     defaultValues: {
       name: "",
+      description: "",
       address: "",
       price: 0,
       maxOccupants: 1,
       deposit: 0,
-      paymentFrequency: "monthly"
+      paymentFrequency: "monthly",
+      totalRooms: 1,
+      bathrooms: 1,
+      bedrooms: 1,
+      propertyType: "apartment",
+      floorNumber: 0,
+      totalFloors: 1,
+      surfaceArea: 0,
+      wifiNetwork: "",
+      wifiPassword: "",
+      buildingCode: "",
+      facilities: {
+        hasParking: false,
+        hasElevator: false,
+        hasAirConditioning: false,
+        hasHeating: false,
+        hasWasher: false,
+        hasDryer: false,
+        hasInternet: false,
+        hasTv: false,
+        hasKitchen: false,
+        hasWorkspace: false,
+      },
+      smokingAllowed: false,
+      petsAllowed: false,
+      partiesAllowed: false,
+      photos: [],
     }
   });
 
@@ -40,10 +106,12 @@ export default function HouseParameters() {
         <h1 className="text-2xl font-semibold text-white">Paramètres de la Maison</h1>
       </div>
       
-      <Card className="p-6 bg-[#242E3E]">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <Card className="p-6 bg-[#242E3E]">
+            <h2 className="text-xl font-semibold text-white mb-4">Informations Générales</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Basic Information Section */}
               <FormField
                 control={form.control}
                 name="name"
@@ -59,9 +127,26 @@ export default function HouseParameters() {
 
               <FormField
                 control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel className="text-white">Description</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Décrivez votre propriété..." 
+                        {...field} 
+                        className="bg-[#1A2533] text-white border-[#2A3544] min-h-[100px]" 
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="address"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-2">
                     <FormLabel className="text-white">Adresse</FormLabel>
                     <FormControl>
                       <Input placeholder="123 rue de la Paix" {...field} className="bg-[#1A2533] text-white border-[#2A3544]" />
@@ -69,7 +154,153 @@ export default function HouseParameters() {
                   </FormItem>
                 )}
               />
+            </div>
+          </Card>
 
+          <Card className="p-6 bg-[#242E3E]">
+            <h2 className="text-xl font-semibold text-white mb-4">Détails de la Propriété</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <FormField
+                control={form.control}
+                name="bedrooms"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">
+                      <div className="flex items-center gap-2">
+                        <Bed className="w-4 h-4 text-[#7FD1C7]" />
+                        Chambres
+                      </div>
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="number" min="0" {...field} className="bg-[#1A2533] text-white border-[#2A3544]" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="bathrooms"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Salles de bain</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="0" {...field} className="bg-[#1A2533] text-white border-[#2A3544]" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="surfaceArea"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Surface (m²)</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="0" {...field} className="bg-[#1A2533] text-white border-[#2A3544]" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+          </Card>
+
+          <Card className="p-6 bg-[#242E3E]">
+            <h2 className="text-xl font-semibold text-white mb-4">Informations d'Accès</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="wifiNetwork"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">
+                      <div className="flex items-center gap-2">
+                        <Wifi className="w-4 h-4 text-[#7FD1C7]" />
+                        Nom du réseau WiFi
+                      </div>
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} className="bg-[#1A2533] text-white border-[#2A3544]" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="wifiPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">
+                      <div className="flex items-center gap-2">
+                        <Key className="w-4 h-4 text-[#7FD1C7]" />
+                        Mot de passe WiFi
+                      </div>
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} className="bg-[#1A2533] text-white border-[#2A3544]" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="buildingCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Code d'accès au bâtiment</FormLabel>
+                    <FormControl>
+                      <Input {...field} className="bg-[#1A2533] text-white border-[#2A3544]" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+          </Card>
+
+          <Card className="p-6 bg-[#242E3E]">
+            <h2 className="text-xl font-semibold text-white mb-4">Équipements et Services</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.entries(form.watch("facilities")).map(([key, value]) => (
+                <div key={key} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id={key}
+                    checked={value}
+                    onChange={(e) => {
+                      form.setValue(`facilities.${key}`, e.target.checked);
+                    }}
+                    className="w-4 h-4 text-[#7FD1C7] bg-[#1A2533] border-[#2A3544] rounded"
+                  />
+                  <label htmlFor={key} className="text-white">
+                    {key.replace('has', '').replace(/([A-Z])/g, ' $1').trim()}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card className="p-6 bg-[#242E3E]">
+            <h2 className="text-xl font-semibold text-white mb-4">Photos</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[1, 2, 3].map((index) => (
+                <div key={index} className="relative group">
+                  <AspectRatio ratio={4/3} className="bg-[#1A2533] border-2 border-dashed border-[#2A3544] rounded-lg overflow-hidden">
+                    <div className="flex flex-col items-center justify-center h-full">
+                      <Image className="w-8 h-8 text-[#7FD1C7] mb-2" />
+                      <span className="text-sm text-gray-400">Ajouter une photo</span>
+                    </div>
+                  </AspectRatio>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card className="p-6 bg-[#242E3E]">
+            <h2 className="text-xl font-semibold text-white mb-4">Conditions Financières</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <FormField
                 control={form.control}
                 name="price"
@@ -78,19 +309,6 @@ export default function HouseParameters() {
                     <FormLabel className="text-white">Prix du loyer (€)</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} className="bg-[#1A2533] text-white border-[#2A3544]" />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="maxOccupants"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">Nombre max d'occupants</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="1" {...field} className="bg-[#1A2533] text-white border-[#2A3544]" />
                     </FormControl>
                   </FormItem>
                 )}
@@ -129,14 +347,14 @@ export default function HouseParameters() {
                 )}
               />
             </div>
+          </Card>
 
-            <Button type="submit" className="w-full md:w-auto bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
-              <Save className="w-4 h-4 mr-2" />
-              Sauvegarder les paramètres
-            </Button>
-          </form>
-        </Form>
-      </Card>
+          <Button type="submit" className="w-full md:w-auto bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
+            <House className="w-4 h-4 mr-2" />
+            Sauvegarder les paramètres
+          </Button>
+        </form>
+      </Form>
     </div>
   );
 }
