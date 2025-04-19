@@ -114,26 +114,39 @@ export default function HouseParameters() {
         return;
       }
 
-      console.log("Ajout de propriété en cours...", data);
+      console.log("Préparation de l'ajout de propriété...", data);
       
-      // Create the property
+      // Create the property with required fields
       const propertyData = {
         name: data.name,
         address: data.address,
-        rooms: data.totalRooms,
+        rooms: data.totalRooms || 1,
         landlordId: user.uid,
+        // Add more detailed information from the form
+        description: data.description,
+        price: data.price,
+        maxOccupants: data.maxOccupants,
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        surfaceArea: data.surfaceArea,
+        wifiInfo: {
+          network: data.wifiNetwork,
+          password: data.wifiPassword
+        },
+        buildingCode: data.buildingCode,
+        facilities: data.facilities
       };
 
-      console.log("Données de propriété à envoyer:", propertyData);
+      console.log("Tentative d'ajout de propriété avec données:", propertyData);
       
       const propertyId = await addProperty(propertyData);
       console.log("Propriété ajoutée avec succès, ID:", propertyId);
       
       toast.success("Propriété ajoutée avec succès");
       navigate(`/dashboard/property/${propertyId}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur lors de l'ajout de la propriété:", error);
-      toast.error("Erreur lors de l'ajout de la propriété");
+      toast.error(`Erreur lors de l'ajout de la propriété: ${error.message || "Erreur inconnue"}`);
     } finally {
       setIsSubmitting(false);
     }

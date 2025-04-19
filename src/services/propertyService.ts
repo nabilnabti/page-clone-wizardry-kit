@@ -1,3 +1,4 @@
+
 import { db, storage } from "@/lib/firebase";
 import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -26,9 +27,18 @@ export const addProperty = async (property: Omit<Property, "id" | "createdAt">, 
       imageUrl
     };
 
-    console.log("Enregistrement de la propriété:", propertyData);
+    console.log("Préparation de l'enregistrement de la propriété:", propertyData);
 
+    // Create a document in the properties collection
     await setDoc(doc(db, "properties", propertyId), propertyData);
+    
+    // Also create a subcollection in the user's document to associate the property
+    await setDoc(doc(db, `users/${property.landlordId}/properties`, propertyId), {
+      propertyId,
+      createdAt: new Date().toISOString()
+    });
+
+    console.log("Propriété enregistrée avec succès:", propertyId);
     return propertyId;
   } catch (error) {
     console.error("Erreur lors de l'ajout de la propriété:", error);
