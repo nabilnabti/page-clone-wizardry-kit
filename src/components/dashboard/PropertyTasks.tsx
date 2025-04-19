@@ -1,9 +1,22 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ListTodo, Calendar, Check } from "lucide-react";
+import { ListTodo, Calendar, Check, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CleaningTaskRotation } from "./CleaningTaskRotation";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data - in a real app this would come from an API
 const tasksByProperty = {
@@ -79,10 +92,80 @@ const tasksByProperty = {
   ]
 };
 
+// Sample data for tenants by property
+const tenantsByProperty = {
+  "1": [
+    { id: 1, name: "Thomas Martin" },
+    { id: 2, name: "Sarah Johnson" },
+  ],
+  "2": [
+    { id: 3, name: "Michael Brown" },
+    { id: 4, name: "Emma Wilson" },
+    { id: 5, name: "David Lee" },
+  ],
+  "3": [
+    { id: 6, name: "Nina Garcia" },
+    { id: 7, name: "Alex Chen" },
+    { id: 8, name: "Laura Smith" },
+  ]
+};
+
 export function PropertyTasks({ propertyId }: { propertyId: string }) {
-  const tasks = tasksByProperty[propertyId] || [];
+  const [tasks, setTasks] = useState(tasksByProperty[propertyId] || []);
   const pendingTasks = tasks.filter(task => task.status === "pending");
   const completedTasks = tasks.filter(task => task.status === "completed");
+  
+  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newTaskAssignee, setNewTaskAssignee] = useState("");
+  const { toast } = useToast();
+
+  const handleAddTask = () => {
+    if (!newTaskTitle || !newTaskAssignee) {
+      toast({
+        title: "Champs manquants",
+        description: "Veuillez remplir tous les champs obligatoires.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newTask = {
+      id: Math.max(0, ...tasks.map(t => t.id)) + 1,
+      title: newTaskTitle,
+      description: newTaskDescription,
+      assignedTo: newTaskAssignee,
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }),
+      status: "pending"
+    };
+
+    setTasks([...tasks, newTask]);
+    setNewTaskTitle("");
+    setNewTaskDescription("");
+    setNewTaskAssignee("");
+    setIsAddTaskOpen(false);
+    
+    toast({
+      title: "Tâche ajoutée",
+      description: "La nouvelle tâche a été ajoutée avec succès."
+    });
+  };
+
+  const handleMarkAsCompleted = (taskId: number) => {
+    setTasks(tasks.map(task => 
+      task.id === taskId ? { ...task, status: "completed" } : task
+    ));
+    
+    toast({
+      title: "Tâche terminée",
+      description: "La tâche a été marquée comme terminée."
+    });
+  };
 
   return (
     <div>
@@ -101,9 +184,68 @@ export function PropertyTasks({ propertyId }: { propertyId: string }) {
         <TabsContent value="current">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-white">Tâches de nettoyage</h2>
-            <Button className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
-              Ajouter une tâche
-            </Button>
+            
+            <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ajouter une tâche
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-white">
+                <DialogHeader>
+                  <DialogTitle>Ajouter une nouvelle tâche</DialogTitle>
+                  <DialogDescription>
+                    Créez une nouvelle tâche de nettoyage pour cette propriété.
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="task-name">Titre de la tâche</Label>
+                    <Input
+                      id="task-name"
+                      value={newTaskTitle}
+                      onChange={(e) => setNewTaskTitle(e.target.value)}
+                      placeholder="Ex: Nettoyage de la cuisine"
+                    />
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <Label htmlFor="task-description">Description</Label>
+                    <Input
+                      id="task-description"
+                      value={newTaskDescription}
+                      onChange={(e) => setNewTaskDescription(e.target.value)}
+                      placeholder="Détails sur la tâche à effectuer"
+                    />
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <Label htmlFor="task-assignee">Assigné à</Label>
+                    <select
+                      id="task-assignee"
+                      value={newTaskAssignee}
+                      onChange={(e) => setNewTaskAssignee(e.target.value)}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <option value="">Sélectionner un locataire</option>
+                      {tenantsByProperty[propertyId]?.map((tenant) => (
+                        <option key={tenant.id} value={tenant.name}>
+                          {tenant.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                
+                <DialogFooter>
+                  <Button onClick={handleAddTask} className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
+                    Ajouter la tâche
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
           
           <div className="mb-6">
@@ -121,7 +263,12 @@ export function PropertyTasks({ propertyId }: { propertyId: string }) {
                   <Card key={task.id} className="p-4 bg-[#242E3E] border-none shadow-md">
                     <div className="flex justify-between mb-2">
                       <h4 className="font-medium text-white">{task.title}</h4>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0"
+                        onClick={() => handleMarkAsCompleted(task.id)}
+                      >
                         <Check className="h-4 w-4 text-[#7FD1C7]" />
                       </Button>
                     </div>
