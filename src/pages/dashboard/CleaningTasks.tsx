@@ -8,7 +8,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
 
 // Sample data - in a real app, this would come from your backend
 const cleaningTasks = [

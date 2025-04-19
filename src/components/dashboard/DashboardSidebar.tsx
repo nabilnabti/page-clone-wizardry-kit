@@ -1,4 +1,5 @@
-import { Building, Home, FileText, House, CreditCard, Users, Package, ChevronDown, calendar } from "lucide-react";
+
+import { Building, Home, FileText, House, CreditCard, Users, Package, ChevronDown, Calendar } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -22,7 +23,7 @@ const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
   { title: "Tenants", icon: Users, url: "/dashboard/tenants" },
   { title: "Payments", icon: CreditCard, url: "/dashboard/payments" },
-  { title: "Cleaning Tasks", icon: calendar, url: "/dashboard/cleaning-tasks" },
+  { title: "Cleaning Tasks", icon: Calendar, url: "/dashboard/cleaning-tasks" },
   { title: "Subletting Rules", icon: FileText, url: "/dashboard/subletting-rules" },
   { title: "House Rules", icon: House, url: "/dashboard/house-rules" },
   { title: "Abonnement", icon: Package, url: "/dashboard/subscriptions" },
