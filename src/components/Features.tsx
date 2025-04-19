@@ -1,29 +1,29 @@
 
-import { calendar, credit-card, file-text, bell } from "lucide-react";
+import { Calendar, CreditCard, FileText, Bell } from "lucide-react";
 
 const features = [
   {
-    icon: calendar,
+    icon: Calendar,
     title: "Check-In & Check-Out",
     description: "Keep track of tenant start and end dates",
   },
   {
-    icon: credit-card,
+    icon: CreditCard,
     title: "Payment Updates",
     description: "Receive and record payments with ease",
   },
   {
-    icon: file-text,
+    icon: FileText,
     title: "House Rules & Charter",
     description: "Access important guidelines and regulations",
   },
   {
-    icon: bell,
+    icon: Bell,
     title: "Notice",
     description: "Submit and manage move-out notices",
   },
   {
-    icon: calendar,
+    icon: Calendar,
     title: "Cleaning Tasks",
     description: "Stay on top of weekly chores with a schedule",
   },
