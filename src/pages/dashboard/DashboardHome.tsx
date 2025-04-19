@@ -4,6 +4,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import * as React from "react";
 
 // Sample properties data - in a real app this would come from an API
 const properties = [
@@ -38,6 +39,18 @@ const properties = [
 
 export default function DashboardHome() {
   const isMobile = useIsMobile();
+  const [api, setApi] = React.useState();
+  const [current, setCurrent] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [api]);
 
   const stats = [
     { 
@@ -99,17 +112,28 @@ export default function DashboardHome() {
   );
 
   const PropertiesCarousel = () => (
-    <Carousel className="w-full">
-      <CarouselContent>
-        {properties.map((property) => (
-          <CarouselItem key={property.id}>
-            <PropertyCard property={property} />
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      <CarouselPrevious className="hidden md:flex" />
-      <CarouselNext className="hidden md:flex" />
-    </Carousel>
+    <div className="relative">
+      <Carousel setApi={setApi} className="w-full">
+        <CarouselContent>
+          {properties.map((property) => (
+            <CarouselItem key={property.id}>
+              <PropertyCard property={property} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <div className="flex justify-center gap-2 mt-4">
+          {properties.map((_, index) => (
+            <button
+              key={index}
+              className={`h-2 w-2 rounded-full transition-colors ${
+                index === current ? "bg-[#7FD1C7]" : "bg-gray-300"
+              }`}
+              onClick={() => api?.scrollTo(index)}
+            />
+          ))}
+        </div>
+      </Carousel>
+    </div>
   );
 
   const PropertyCard = ({ property }) => (
