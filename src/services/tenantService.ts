@@ -34,12 +34,13 @@ export const addTenant = async (tenant: Omit<Tenant, "id" | "createdAt">, imageF
     ...tenant,
     id: tenantId,
     createdAt: new Date().toISOString(),
-    profileImageUrl
+    profileImageUrl,
+    status: tenant.status || "active"
   };
 
   await setDoc(doc(db, "tenants", tenantId), tenantData);
   
-  // Update user document with tenant information
+  // Only update user document if we have a userId
   if (tenant.userId) {
     await updateDoc(doc(db, "users", tenant.userId), {
       propertyId: tenant.propertyId,

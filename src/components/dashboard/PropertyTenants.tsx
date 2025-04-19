@@ -1,14 +1,13 @@
-
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { User, Edit, Mail, Phone, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { User, Mail, Phone } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getTenantsByProperty } from "@/services/tenantService";
 import { Loader2 } from "lucide-react";
+import { AddTenantDialog } from "./AddTenantDialog";
 
 export function PropertyTenants({ propertyId }: { propertyId?: string }) {
-  const { data: tenants = [], isLoading } = useQuery({
+  const { data: tenants = [], isLoading, refetch } = useQuery({
     queryKey: ['tenants', propertyId],
     queryFn: () => getTenantsByProperty(propertyId || ''),
     enabled: !!propertyId
@@ -26,10 +25,7 @@ export function PropertyTenants({ propertyId }: { propertyId?: string }) {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-white">Locataires</h2>
-        <Button className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
-          <Plus className="h-4 w-4 mr-2" />
-          Ajouter un locataire
-        </Button>
+        {propertyId && <AddTenantDialog propertyId={propertyId} onTenantAdded={() => refetch()} />}
       </div>
       
       {tenants.length === 0 ? (
@@ -37,10 +33,7 @@ export function PropertyTenants({ propertyId }: { propertyId?: string }) {
           <User className="h-12 w-12 mx-auto mb-4 text-gray-500" />
           <h3 className="text-white text-lg font-medium mb-2">Aucun locataire</h3>
           <p className="text-gray-400 mb-6">Vous n'avez pas encore ajouté de locataires à cette propriété.</p>
-          <Button className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533] mx-auto">
-            <Plus className="h-4 w-4 mr-2" />
-            Ajouter votre premier locataire
-          </Button>
+          {propertyId && <AddTenantDialog propertyId={propertyId} onTenantAdded={() => refetch()} />}
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
