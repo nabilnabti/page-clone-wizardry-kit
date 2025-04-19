@@ -1,4 +1,3 @@
-
 import { TenantLayout } from "@/components/tenant/TenantLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { getTenantByUserId } from "@/services/tenantService";
-import { getCleaningTasksByTenant, completeCleaningTask, CleaningTask } from "@/services/cleaningService";
+import { getCleaningTasksByTenant, completeCleaningTask } from "@/services/cleaningService";
+import { CleaningTask } from "@/types";
 
 export default function TenantCleaning() {
   const [cleaningTasks, setCleaningTasks] = useState<CleaningTask[]>([]);
