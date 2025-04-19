@@ -2,8 +2,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
-import { LogIn, UserPlus } from "lucide-react";
+import { LogIn, UserPlus, Building, Users } from "lucide-react";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -26,10 +27,30 @@ const Auth = () => {
           <CardDescription className="text-gray-400">
             {isLogin
               ? "Enter your credentials to access your account"
-              : "Enter your information to create your account"}
+              : "Choose your account type and enter your information"}
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {!isLogin && (
+            <Tabs defaultValue="tenant" className="mb-4">
+              <TabsList className="w-full bg-[#2A3544]">
+                <TabsTrigger value="tenant" className="w-1/2 data-[state=active]:bg-[#7FD1C7] data-[state=active]:text-[#1A2533]">
+                  <Users className="mr-2 h-4 w-4" />
+                  Tenant
+                </TabsTrigger>
+                <TabsTrigger value="landlord" className="w-1/2 data-[state=active]:bg-[#7FD1C7] data-[state=active]:text-[#1A2533]">
+                  <Building className="mr-2 h-4 w-4" />
+                  Landlord
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="tenant">
+                <p className="text-sm text-gray-400 mb-4">Register as a tenant to find and manage your coliving space</p>
+              </TabsContent>
+              <TabsContent value="landlord">
+                <p className="text-sm text-gray-400 mb-4">Register as a landlord to list and manage your properties</p>
+              </TabsContent>
+            </Tabs>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Input
