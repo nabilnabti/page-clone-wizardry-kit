@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } fr
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface HouseParametersForm {
   // Basic Information
@@ -100,6 +100,11 @@ export default function HouseParameters() {
     toast.success("Paramètres sauvegardés avec succès");
   };
 
+  const handleFacilityChange = (key: keyof HouseParametersForm['facilities'], checked: boolean) => {
+    const updatedFacilities = { ...form.getValues('facilities'), [key]: checked };
+    form.setValue('facilities', updatedFacilities, { shouldValidate: true });
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -111,7 +116,6 @@ export default function HouseParameters() {
           <Card className="p-6 bg-[#242E3E]">
             <h2 className="text-xl font-semibold text-white mb-4">Informations Générales</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Basic Information Section */}
               <FormField
                 control={form.control}
                 name="name"
@@ -265,16 +269,15 @@ export default function HouseParameters() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Object.entries(form.watch("facilities")).map(([key, value]) => (
                 <div key={key} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     id={key}
                     checked={value}
-                    onChange={(e) => {
-                      form.setValue(`facilities.${key}`, e.target.checked);
-                    }}
+                    onCheckedChange={(checked) => 
+                      handleFacilityChange(key as keyof HouseParametersForm['facilities'], !!checked)
+                    }
                     className="w-4 h-4 text-[#7FD1C7] bg-[#1A2533] border-[#2A3544] rounded"
                   />
-                  <label htmlFor={key} className="text-white">
+                  <label htmlFor={key} className="text-white cursor-pointer">
                     {key.replace('has', '').replace(/([A-Z])/g, ' $1').trim()}
                   </label>
                 </div>
