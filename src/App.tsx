@@ -41,6 +41,7 @@ const App = () => (
             <Route path="cleaning-tasks" element={<CleaningTasks />} />
             <Route path="house-rules" element={<HouseRules />} />
             <Route path="house-parameters" element={<HouseParameters />} />
+            <Route path="house-parameters/new" element={<HouseParameters />} />
             <Route path="subscriptions" element={<Subscriptions />} />
             <Route path="property/:propertyId" element={<PropertyDetail />} />
             <Route path="tenant/:tenantId" element={<TenantDetail />} />

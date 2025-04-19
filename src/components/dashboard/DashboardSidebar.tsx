@@ -1,4 +1,3 @@
-
 import { Building, Home, FileText, House, CreditCard, Users, Package, ChevronDown, Calendar } from "lucide-react";
 import {
   Sidebar,
@@ -44,6 +43,10 @@ export function DashboardSidebar() {
     setSelectedProperty(property);
   };
 
+  const handleAddNewProperty = () => {
+    navigate('/dashboard/house-parameters/new');
+  };
+
   return (
     <>
       <div className="hidden md:block">
@@ -77,7 +80,10 @@ export function DashboardSidebar() {
                       </div>
                     </DropdownMenuItem>
                   ))}
-                  <DropdownMenuItem className="text-[#7FD1C7]">
+                  <DropdownMenuItem 
+                    className="text-[#7FD1C7] cursor-pointer" 
+                    onClick={handleAddNewProperty}
+                  >
                     + Add New Property
                   </DropdownMenuItem>
                 </DropdownMenuContent>
