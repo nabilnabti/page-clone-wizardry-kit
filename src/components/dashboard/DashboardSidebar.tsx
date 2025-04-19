@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
@@ -21,6 +22,9 @@ const menuItems = [
 ];
 
 export function DashboardSidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-[#2A3544] pb-2">
@@ -35,8 +39,18 @@ export function DashboardSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url} className="text-gray-300 hover:text-white">
+                  <SidebarMenuButton 
+                    asChild
+                    className={location.pathname === item.url ? "bg-[#2A3544] text-[#7FD1C7]" : ""}
+                  >
+                    <a 
+                      href={item.url} 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate(item.url);
+                      }}
+                      className="text-gray-300 hover:text-white"
+                    >
                       <item.icon />
                       <span>{item.title}</span>
                     </a>

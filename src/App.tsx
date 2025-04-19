@@ -8,6 +8,11 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import DashboardHome from "./pages/dashboard/DashboardHome";
+import Tenants from "./pages/dashboard/Tenants";
+import Payments from "./pages/dashboard/Payments";
+import HouseRules from "./pages/dashboard/HouseRules";
+import SublettingRules from "./pages/dashboard/SublettingRules";
 import TenantDashboard from "./pages/tenant/TenantDashboard";
 import TenantPayments from "./pages/tenant/TenantPayments";
 import TenantCleaning from "./pages/tenant/TenantCleaning";
@@ -24,7 +29,13 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />}>
+            <Route index element={<DashboardHome />} />
+            <Route path="tenants" element={<Tenants />} />
+            <Route path="payments" element={<Payments />} />
+            <Route path="house-rules" element={<HouseRules />} />
+            <Route path="subletting-rules" element={<SublettingRules />} />
+          </Route>
           <Route path="/tenant" element={<TenantDashboard />} />
           <Route path="/tenant/payments" element={<TenantPayments />} />
           <Route path="/tenant/cleaning" element={<TenantCleaning />} />
