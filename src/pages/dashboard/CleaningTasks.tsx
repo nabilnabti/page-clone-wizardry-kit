@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import {
@@ -10,7 +9,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, ListTodo, RotateCw } from "lucide-react";
+import { Calendar, ListTodo, RotateCw, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -19,8 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-// Sample data - in a real app, this would come from your backend
 const cleaningTasks = [
   {
     id: 1,
@@ -84,6 +83,7 @@ const rotationSchedules = [
 export default function CleaningTasks() {
   const [propertyFilter, setPropertyFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [isNewRotationDialogOpen, setIsNewRotationDialogOpen] = useState(false);
   
   const filteredTasks = cleaningTasks.filter(task => {
     if (propertyFilter !== "all" && task.property !== propertyFilter) return false;
@@ -177,9 +177,19 @@ export default function CleaningTasks() {
           <Card className="bg-white p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-medium">Systèmes de rotation</h2>
-              <Button className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
-                Nouvelle rotation
-              </Button>
+              <Dialog open={isNewRotationDialogOpen} onOpenChange={setIsNewRotationDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nouvelle rotation
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Créer une nouvelle rotation de tâches</DialogTitle>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
             </div>
             
             <div className="overflow-x-auto">
