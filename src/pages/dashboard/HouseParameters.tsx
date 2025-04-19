@@ -1,17 +1,17 @@
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Wifi, Key, Bed, House, Image } from "lucide-react";
+import { Wifi, Key, Bed, House, Image, Plus } from "lucide-react";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { addProperty } from "@/services/propertyService";
+import { useState } from "react";
 
 interface HouseParametersForm {
   // Basic Information
@@ -63,6 +63,9 @@ interface HouseParametersForm {
 export default function HouseParameters() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isNewProperty = location.pathname.includes('/new');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<HouseParametersForm>({
     defaultValues: {
@@ -104,11 +107,15 @@ export default function HouseParameters() {
 
   const onSubmit = async (data: HouseParametersForm) => {
     try {
+      setIsSubmitting(true);
       if (!user?.uid) {
-        toast.error("User not authenticated");
+        toast.error("Utilisateur non authentifié");
+        setIsSubmitting(false);
         return;
       }
 
+      console.log("Ajout de propriété en cours...", data);
+      
       // Create the property
       const propertyData = {
         name: data.name,
@@ -117,13 +124,18 @@ export default function HouseParameters() {
         landlordId: user.uid,
       };
 
+      console.log("Données de propriété à envoyer:", propertyData);
+      
       const propertyId = await addProperty(propertyData);
+      console.log("Propriété ajoutée avec succès, ID:", propertyId);
       
       toast.success("Propriété ajoutée avec succès");
       navigate(`/dashboard/property/${propertyId}`);
     } catch (error) {
-      console.error("Error adding property:", error);
+      console.error("Erreur lors de l'ajout de la propriété:", error);
       toast.error("Erreur lors de l'ajout de la propriété");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -135,7 +147,9 @@ export default function HouseParameters() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-white">Paramètres de la Maison</h1>
+        <h1 className="text-2xl font-semibold text-white">
+          {isNewProperty ? "Ajouter un logement" : "Paramètres de la Maison"}
+        </h1>
       </div>
       
       <Form {...form}>
@@ -180,7 +194,12 @@ export default function HouseParameters() {
                   <FormItem className="col-span-2">
                     <FormLabel className="text-white">Adresse</FormLabel>
                     <FormControl>
-                      <Input placeholder="123 rue de la Paix" {...field} className="bg-[#1A2533] text-white border-[#2A3544]" />
+                      <Input 
+                        placeholder="123 rue de la Paix" 
+                        {...field} 
+                        className="bg-[#1A2533] text-white border-[#2A3544]" 
+                        required
+                      />
                     </FormControl>
                   </FormItem>
                 )}
@@ -379,9 +398,28 @@ export default function HouseParameters() {
             </div>
           </Card>
 
-          <Button type="submit" className="w-full md:w-auto bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
-            <House className="w-4 h-4 mr-2" />
-            Sauvegarder les paramètres
+          <Button 
+            type="submit" 
+            className="w-full md:w-auto bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-[#1A2533]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Traitement en cours...
+              </span>
+            ) : (
+              <>
+                {isNewProperty ? (
+                  <><Plus className="w-4 h-4 mr-2" />Ajouter mon logement</>
+                ) : (
+                  <><House className="w-4 h-4 mr-2" />Sauvegarder les paramètres</>
+                )}
+              </>
+            )}
           </Button>
         </form>
       </Form>

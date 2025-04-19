@@ -1,38 +1,39 @@
-
 import { db, storage } from "@/lib/firebase";
 import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
-
-export interface Property {
-  id: string;
-  name: string;
-  address: string;
-  rooms: number;
-  landlordId: string;
-  createdAt: string;
-  imageUrl?: string;
-}
+import { Property } from "@/types";
 
 export const addProperty = async (property: Omit<Property, "id" | "createdAt">, imageFile?: File): Promise<string> => {
-  const propertyId = uuidv4();
-  let imageUrl = undefined;
+  try {
+    if (!property.name || !property.address || !property.landlordId) {
+      throw new Error("Informations de propriété incomplètes");
+    }
 
-  if (imageFile) {
-    const storageRef = ref(storage, `properties/${propertyId}/${imageFile.name}`);
-    await uploadBytes(storageRef, imageFile);
-    imageUrl = await getDownloadURL(storageRef);
+    const propertyId = uuidv4();
+    let imageUrl = undefined;
+
+    if (imageFile) {
+      const storageRef = ref(storage, `properties/${propertyId}/${imageFile.name}`);
+      await uploadBytes(storageRef, imageFile);
+      imageUrl = await getDownloadURL(storageRef);
+    }
+
+    const propertyData = {
+      ...property,
+      id: propertyId,
+      createdAt: new Date().toISOString(),
+      imageUrl
+    };
+
+    console.log("Enregistrement de la propriété:", propertyData);
+
+    await setDoc(doc(db, "properties", propertyId), propertyData);
+    return propertyId;
+  } catch (error) {
+    console.error("Erreur lors de l'ajout de la propriété:", error);
+    throw error;
   }
-
-  const propertyData = {
-    ...property,
-    id: propertyId,
-    createdAt: new Date().toISOString(),
-    imageUrl
-  };
-
-  await setDoc(doc(db, "properties", propertyId), propertyData);
-  return propertyId;
 };
 
 export const getProperty = async (propertyId: string): Promise<Property | null> => {
