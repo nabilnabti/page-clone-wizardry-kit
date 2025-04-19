@@ -8,6 +8,9 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { addProperty } from "@/services/propertyService";
 
 interface HouseParametersForm {
   // Basic Information
@@ -57,6 +60,9 @@ interface HouseParametersForm {
 }
 
 export default function HouseParameters() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   const form = useForm<HouseParametersForm>({
     defaultValues: {
       name: "",
@@ -95,9 +101,29 @@ export default function HouseParameters() {
     }
   });
 
-  const onSubmit = (data: HouseParametersForm) => {
-    console.log(data);
-    toast.success("Paramètres sauvegardés avec succès");
+  const onSubmit = async (data: HouseParametersForm) => {
+    try {
+      if (!user?.id) {
+        toast.error("User not authenticated");
+        return;
+      }
+
+      // Create the property
+      const propertyData = {
+        name: data.name,
+        address: data.address,
+        rooms: data.totalRooms,
+        landlordId: user.id,
+      };
+
+      const propertyId = await addProperty(propertyData);
+      
+      toast.success("Propriété ajoutée avec succès");
+      navigate(`/dashboard/property/${propertyId}`);
+    } catch (error) {
+      console.error("Error adding property:", error);
+      toast.error("Erreur lors de l'ajout de la propriété");
+    }
   };
 
   const handleFacilityChange = (key: keyof HouseParametersForm['facilities'], checked: boolean) => {
