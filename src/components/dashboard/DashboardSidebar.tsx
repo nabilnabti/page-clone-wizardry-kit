@@ -24,8 +24,8 @@ const menuItems = [
   { title: "Tenants", icon: Users, url: "/dashboard/tenants" },
   { title: "Payments", icon: CreditCard, url: "/dashboard/payments" },
   { title: "Cleaning Tasks", icon: Calendar, url: "/dashboard/cleaning-tasks" },
-  { title: "Subletting Rules", icon: FileText, url: "/dashboard/subletting-rules" },
-  { title: "House Rules", icon: House, url: "/dashboard/house-rules" },
+  { title: "House Parameters", icon: House, url: "/dashboard/house-parameters" },
+  { title: "House Rules", icon: FileText, url: "/dashboard/house-rules" },
   { title: "Abonnement", icon: Package, url: "/dashboard/subscriptions" },
 ];
 
