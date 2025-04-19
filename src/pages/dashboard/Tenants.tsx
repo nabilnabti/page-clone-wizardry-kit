@@ -1,9 +1,11 @@
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { User, Edit, Trash, Mail, Phone } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Tenants() {
+  const navigate = useNavigate();
+  
   const tenants = [
     { 
       id: 1,
@@ -52,6 +54,10 @@ export default function Tenants() {
     },
   ];
 
+  const handleTenantClick = (tenantId: number) => {
+    navigate(`/dashboard/tenant/${tenantId}`);
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -63,7 +69,11 @@ export default function Tenants() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {tenants.map((tenant) => (
-          <Card key={tenant.id} className="p-4 bg-[#242E3E] border-none shadow-md">
+          <Card 
+            key={tenant.id} 
+            className="p-4 bg-[#242E3E] border-none shadow-md hover:bg-[#2A3544] transition-colors cursor-pointer"
+            onClick={() => handleTenantClick(tenant.id)}
+          >
             <div className="flex items-center mb-4">
               <div className="bg-[#7FD1C7]/20 p-3 rounded-full mr-3">
                 <User className="text-[#7FD1C7]" size={24} />
@@ -86,11 +96,27 @@ export default function Tenants() {
             </div>
             
             <div className="border-t border-gray-700 pt-3 mt-2 flex justify-between">
-              <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white hover:bg-[#2A3544]">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-gray-300 hover:text-white hover:bg-[#2A3544]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Edit functionality here
+                }}
+              >
                 <Edit size={16} className="mr-1" />
                 Edit
               </Button>
-              <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300 hover:bg-[#2A3544]">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-red-400 hover:text-red-300 hover:bg-[#2A3544]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Remove functionality here
+                }}
+              >
                 <Trash size={16} className="mr-1" />
                 Remove
               </Button>
