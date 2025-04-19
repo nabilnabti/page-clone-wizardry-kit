@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { User, Mail, Phone, UserPlus } from "lucide-react";
@@ -32,13 +33,15 @@ export function PropertyTenants({ propertyId }: { propertyId?: string }) {
     enabled: !!activePropertyId,
     staleTime: 5 * 60 * 1000,
     retry: 1,
-    onError: (error) => {
-      console.error("Error fetching tenants:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les locataires pour cette propriété",
-        variant: "destructive",
-      });
+    meta: {
+      onError: (error: any) => {
+        console.error("Error fetching tenants:", error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les locataires pour cette propriété",
+          variant: "destructive",
+        });
+      }
     }
   });
 

@@ -1,4 +1,3 @@
-
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -43,13 +42,15 @@ export default function PropertyDetail() {
     queryFn: () => getProperty(propertyId || ''),
     enabled: !!propertyId,
     retry: 1,
-    onError: (error) => {
-      console.error("Error fetching property:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les détails de la propriété",
-        variant: "destructive",
-      });
+    meta: {
+      onError: (error: any) => {
+        console.error("Error fetching property:", error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les détails de la propriété",
+          variant: "destructive",
+        });
+      }
     }
   });
   

@@ -52,13 +52,15 @@ export function DashboardSidebar() {
     enabled: !!user?.uid,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
-    onError: (error) => {
-      console.error("Error fetching properties:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les propriétés",
-        variant: "destructive",
-      });
+    meta: {
+      onError: (error: any) => {
+        console.error("Error fetching properties:", error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les propriétés",
+          variant: "destructive",
+        });
+      }
     }
   });
 
