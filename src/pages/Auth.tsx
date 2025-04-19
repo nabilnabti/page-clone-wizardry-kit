@@ -13,7 +13,6 @@ const Auth = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // À implémenter avec Supabase plus tard
     console.log("Form submitted:", { email, password });
   };
 
@@ -26,31 +25,37 @@ const Auth = () => {
           </CardTitle>
           <CardDescription className="text-gray-400">
             {isLogin
-              ? "Enter your credentials to access your account"
+              ? "Choose your account type to sign in"
               : "Choose your account type and enter your information"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {!isLogin && (
-            <Tabs defaultValue="tenant" className="mb-4">
-              <TabsList className="w-full bg-[#2A3544]">
-                <TabsTrigger value="tenant" className="w-1/2 data-[state=active]:bg-[#7FD1C7] data-[state=active]:text-[#1A2533]">
-                  <Users className="mr-2 h-4 w-4" />
-                  Tenant
-                </TabsTrigger>
-                <TabsTrigger value="landlord" className="w-1/2 data-[state=active]:bg-[#7FD1C7] data-[state=active]:text-[#1A2533]">
-                  <Building className="mr-2 h-4 w-4" />
-                  Landlord
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="tenant">
-                <p className="text-sm text-gray-400 mb-4">Register as a tenant to find and manage your coliving space</p>
-              </TabsContent>
-              <TabsContent value="landlord">
-                <p className="text-sm text-gray-400 mb-4">Register as a landlord to list and manage your properties</p>
-              </TabsContent>
-            </Tabs>
-          )}
+          <Tabs defaultValue="tenant" className="mb-4">
+            <TabsList className="w-full bg-[#2A3544]">
+              <TabsTrigger value="tenant" className="w-1/2 data-[state=active]:bg-[#7FD1C7] data-[state=active]:text-[#1A2533]">
+                <Users className="mr-2 h-4 w-4" />
+                Tenant
+              </TabsTrigger>
+              <TabsTrigger value="landlord" className="w-1/2 data-[state=active]:bg-[#7FD1C7] data-[state=active]:text-[#1A2533]">
+                <Building className="mr-2 h-4 w-4" />
+                Landlord
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="tenant">
+              <p className="text-sm text-gray-400 mb-4">
+                {isLogin 
+                  ? "Sign in as a tenant to access your coliving space"
+                  : "Register as a tenant to find and manage your coliving space"}
+              </p>
+            </TabsContent>
+            <TabsContent value="landlord">
+              <p className="text-sm text-gray-400 mb-4">
+                {isLogin
+                  ? "Sign in as a landlord to access your properties"
+                  : "Register as a landlord to list and manage your properties"}
+              </p>
+            </TabsContent>
+          </Tabs>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Input
