@@ -116,7 +116,7 @@ export default function DashboardHome() {
                   <TableRow key={row.tenant}>
                     <TableCell>{row.tenant}</TableCell>
                     <TableCell>{row.rent}</TableCell>
-                    <TableCell>{row.date}</TableCell>
+                    <TableCell>{row.dueDate}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
