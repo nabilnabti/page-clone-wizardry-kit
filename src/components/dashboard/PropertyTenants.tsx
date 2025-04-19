@@ -1,10 +1,12 @@
+
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { User, Mail, Phone } from "lucide-react";
+import { User, Mail, Phone, UserPlus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getTenantsByProperty } from "@/services/tenantService";
 import { Loader2 } from "lucide-react";
 import { AddTenantDialog } from "./AddTenantDialog";
+import { Button } from "@/components/ui/button";
 
 export function PropertyTenants({ propertyId }: { propertyId?: string }) {
   const { data: tenants = [], isLoading, refetch } = useQuery({
@@ -33,7 +35,20 @@ export function PropertyTenants({ propertyId }: { propertyId?: string }) {
           <User className="h-12 w-12 mx-auto mb-4 text-gray-500" />
           <h3 className="text-white text-lg font-medium mb-2">Aucun locataire</h3>
           <p className="text-gray-400 mb-6">Vous n'avez pas encore ajouté de locataires à cette propriété.</p>
-          {propertyId && <AddTenantDialog propertyId={propertyId} onTenantAdded={() => refetch()} />}
+          {propertyId && (
+            <Button 
+              onClick={() => {
+                const addTenantButton = document.querySelector("[data-testid='add-tenant-trigger']") as HTMLElement;
+                if (addTenantButton) {
+                  addTenantButton.click();
+                }
+              }}
+              className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]"
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              Ajouter un locataire
+            </Button>
+          )}
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -57,7 +72,7 @@ export function PropertyTenants({ propertyId }: { propertyId?: string }) {
                   </div>
                   <div className="flex items-center text-sm text-gray-300">
                     <Phone size={16} className="mr-2" />
-                    <span>{tenant.phone || 'No phone number'}</span>
+                    <span>{tenant.phone || 'Pas de numéro'}</span>
                   </div>
                 </div>
                 

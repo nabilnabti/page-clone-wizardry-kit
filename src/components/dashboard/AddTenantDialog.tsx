@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Mail, Copy } from "lucide-react";
+import { Plus, Mail, Copy, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addTenant } from "@/services/tenantService";
 
@@ -71,9 +71,9 @@ export function AddTenantDialog({ propertyId, onTenantAdded }: AddTenantDialogPr
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger asChild data-testid="add-tenant-trigger">
         <Button className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
-          <Plus className="h-4 w-4 mr-2" />
+          <UserPlus className="h-4 w-4 mr-2" />
           Ajouter un locataire
         </Button>
       </DialogTrigger>

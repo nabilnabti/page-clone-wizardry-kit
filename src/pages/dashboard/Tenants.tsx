@@ -1,7 +1,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, Edit, Trash, Mail, Phone } from "lucide-react";
+import { User, Edit, Trash, Mail, Phone, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getTenantsByProperty } from "@/services/tenantService";
@@ -50,7 +50,7 @@ export default function Tenants() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-white">Tenants</h1>
+        <h1 className="text-2xl font-semibold text-white">Locataires</h1>
         {user?.propertyId && (
           <AddTenantDialog 
             propertyId={user.propertyId} 
@@ -62,13 +62,21 @@ export default function Tenants() {
       {tenants.length === 0 ? (
         <Card className="p-8 bg-[#242E3E] border-none shadow-md text-center">
           <User className="h-12 w-12 mx-auto mb-4 text-gray-500" />
-          <h3 className="text-white text-lg font-medium mb-2">No tenants yet</h3>
-          <p className="text-gray-400 mb-6">You haven't added any tenants to this property yet.</p>
+          <h3 className="text-white text-lg font-medium mb-2">Aucun locataire</h3>
+          <p className="text-gray-400 mb-6">Vous n'avez pas encore ajouté de locataires à cette propriété.</p>
           {user?.propertyId && (
-            <AddTenantDialog 
-              propertyId={user.propertyId} 
-              onTenantAdded={() => refetch()}
-            />
+            <Button 
+              onClick={() => {
+                const addTenantButton = document.querySelector("[data-testid='add-tenant-trigger']") as HTMLElement;
+                if (addTenantButton) {
+                  addTenantButton.click();
+                }
+              }}
+              className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]"
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              Ajouter un locataire
+            </Button>
           )}
         </Card>
       ) : (
