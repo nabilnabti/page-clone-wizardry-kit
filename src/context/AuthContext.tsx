@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import {
   User,
@@ -89,7 +88,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: "Votre compte a été créé avec succès",
       });
 
-      navigate(role === "tenant" ? "/tenant" : "/dashboard");
+      // If landlord and first time registration, redirect to new property page
+      if (role === "landlord") {
+        navigate("/dashboard/house-parameters/new");
+      } else {
+        navigate(role === "tenant" ? "/tenant" : "/dashboard");
+      }
     } catch (error: any) {
       console.error(error);
       toast({
