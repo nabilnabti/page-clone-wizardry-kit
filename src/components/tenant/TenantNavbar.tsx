@@ -1,12 +1,12 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, CreditCard, Cleaning, Chat } from "lucide-react";
+import { Home, CreditCard, Scroll, MessageCircle } from "lucide-react";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/tenant" },
   { icon: CreditCard, label: "Payments", path: "/tenant/payments" },
-  { icon: Cleaning, label: "Cleaning", path: "/tenant/cleaning" },
-  { icon: Chat, label: "Chat", path: "/tenant/chat" },
+  { icon: Scroll, label: "Cleaning", path: "/tenant/cleaning" },
+  { icon: MessageCircle, label: "Chat", path: "/tenant/chat" },
 ];
 
 export function TenantNavbar() {
