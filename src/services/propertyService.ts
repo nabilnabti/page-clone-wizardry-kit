@@ -12,22 +12,27 @@ export const addProperty = async (property: Omit<Property, "id" | "createdAt">, 
     }
 
     const propertyId = uuidv4();
-    let imageUrl = undefined;
+    let imageUrl = null; // Initialiser avec null au lieu de undefined
 
     if (imageFile) {
-      const storageRef = ref(storage, `properties/${propertyId}/${imageFile.name}`);
-      await uploadBytes(storageRef, imageFile);
-      imageUrl = await getDownloadURL(storageRef);
+      try {
+        const storageRef = ref(storage, `properties/${propertyId}/${imageFile.name}`);
+        await uploadBytes(storageRef, imageFile);
+        imageUrl = await getDownloadURL(storageRef);
+      } catch (uploadError) {
+        console.error("Erreur lors de l'upload de l'image:", uploadError);
+        // Continue sans image plutôt que d'échouer complètement
+      }
     }
+
+    console.log("Préparation de l'enregistrement de la propriété:", { ...property, imageUrl });
 
     const propertyData = {
       ...property,
       id: propertyId,
       createdAt: new Date().toISOString(),
-      imageUrl
+      imageUrl: imageUrl // Sera null si pas d'image ou si l'upload a échoué
     };
-
-    console.log("Préparation de l'enregistrement de la propriété:", propertyData);
 
     // Create a document in the properties collection
     await setDoc(doc(db, "properties", propertyId), propertyData);
@@ -73,10 +78,15 @@ export const updateProperty = async (propertyId: string, property: Partial<Prope
   let updateData = { ...property };
   
   if (imageFile) {
-    const storageRef = ref(storage, `properties/${propertyId}/${imageFile.name}`);
-    await uploadBytes(storageRef, imageFile);
-    const imageUrl = await getDownloadURL(storageRef);
-    updateData.imageUrl = imageUrl;
+    try {
+      const storageRef = ref(storage, `properties/${propertyId}/${imageFile.name}`);
+      await uploadBytes(storageRef, imageFile);
+      const imageUrl = await getDownloadURL(storageRef);
+      updateData.imageUrl = imageUrl;
+    } catch (uploadError) {
+      console.error("Erreur lors de l'upload de l'image:", uploadError);
+      // Continue sans mettre à jour l'image
+    }
   }
   
   await updateDoc(doc(db, "properties", propertyId), updateData);

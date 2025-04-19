@@ -1,8 +1,9 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Wifi, Key, Bed, House, Image, Plus } from "lucide-react";
+import { Wifi, Key, Bed, House, Image, Plus, Upload } from "lucide-react";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -11,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { addProperty } from "@/services/propertyService";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 interface HouseParametersForm {
   // Basic Information
@@ -55,9 +56,6 @@ interface HouseParametersForm {
   smokingAllowed: boolean;
   petsAllowed: boolean;
   partiesAllowed: boolean;
-  
-  // Photos
-  photos: string[];
 }
 
 export default function HouseParameters() {
@@ -66,6 +64,9 @@ export default function HouseParameters() {
   const location = useLocation();
   const isNewProperty = location.pathname.includes('/new');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<HouseParametersForm>({
     defaultValues: {
@@ -101,9 +102,28 @@ export default function HouseParameters() {
       smokingAllowed: false,
       petsAllowed: false,
       partiesAllowed: false,
-      photos: [],
     }
   });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedImage(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
 
   const onSubmit = async (data: HouseParametersForm) => {
     try {
@@ -139,7 +159,7 @@ export default function HouseParameters() {
 
       console.log("Tentative d'ajout de propriété avec données:", propertyData);
       
-      const propertyId = await addProperty(propertyData);
+      const propertyId = await addProperty(propertyData, selectedImage || undefined);
       console.log("Propriété ajoutée avec succès, ID:", propertyId);
       
       toast.success("Propriété ajoutée avec succès");
@@ -346,17 +366,43 @@ export default function HouseParameters() {
 
           <Card className="p-6 bg-[#242E3E]">
             <h2 className="text-xl font-semibold text-white mb-4">Photos</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[1, 2, 3].map((index) => (
-                <div key={index} className="relative group">
-                  <AspectRatio ratio={4/3} className="bg-[#1A2533] border-2 border-dashed border-[#2A3544] rounded-lg overflow-hidden">
-                    <div className="flex flex-col items-center justify-center h-full">
-                      <Image className="w-8 h-8 text-[#7FD1C7] mb-2" />
-                      <span className="text-sm text-gray-400">Ajouter une photo</span>
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <div className="relative group">
+                <AspectRatio ratio={16/9} className={`bg-[#1A2533] border-2 border-dashed border-[#2A3544] rounded-lg overflow-hidden ${previewUrl ? 'border-solid border-[#7FD1C7]' : ''}`}>
+                  {previewUrl ? (
+                    <img 
+                      src={previewUrl} 
+                      alt="Aperçu de la propriété" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full cursor-pointer" onClick={triggerFileInput}>
+                      <Upload className="w-12 h-12 text-[#7FD1C7] mb-2" />
+                      <span className="text-sm text-gray-400">Cliquez pour ajouter une photo (optionnel)</span>
                     </div>
-                  </AspectRatio>
-                </div>
-              ))}
+                  )}
+                </AspectRatio>
+                
+                <input 
+                  type="file" 
+                  ref={fileInputRef}
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={handleImageChange}
+                />
+                
+                {previewUrl && (
+                  <Button 
+                    type="button"
+                    onClick={triggerFileInput}
+                    className="absolute bottom-2 right-2 bg-[#1A2533]/80 hover:bg-[#1A2533] text-white"
+                    size="sm"
+                  >
+                    <Image className="w-4 h-4 mr-1" />
+                    Changer
+                  </Button>
+                )}
+              </div>
             </div>
           </Card>
 
