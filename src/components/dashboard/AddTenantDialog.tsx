@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Mail, Copy, UserPlus } from "lucide-react";
+import { Mail, Copy, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addTenant } from "@/services/tenantService";
 
@@ -22,11 +22,22 @@ interface AddTenantDialogProps {
 export function AddTenantDialog({ propertyId, onTenantAdded }: AddTenantDialogProps) {
   const [email, setEmail] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const inviteLink = `https://yourapp.com/join/${propertyId}/${btoa(email)}`;
 
   const handleAddTenant = async () => {
+    if (!email) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Veuillez saisir une adresse email.",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
     try {
       const tenantData = {
         email,
@@ -58,6 +69,8 @@ export function AddTenantDialog({ propertyId, onTenantAdded }: AddTenantDialogPr
         title: "Erreur",
         description: "Une erreur est survenue lors de l'invitation.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -93,9 +106,22 @@ export function AddTenantDialog({ propertyId, onTenantAdded }: AddTenantDialogPr
                 className="bg-[#1A2533] border-gray-700 text-white"
                 placeholder="email@exemple.com"
               />
-              <Button onClick={handleAddTenant} className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
-                <Mail className="h-4 w-4 mr-2" />
-                Inviter
+              <Button 
+                onClick={handleAddTenant} 
+                className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <Mail className="h-4 w-4 mr-2 animate-spin" />
+                    Envoi...
+                  </span>
+                ) : (
+                  <span className="flex items-center">
+                    <Mail className="h-4 w-4 mr-2" />
+                    Inviter
+                  </span>
+                )}
               </Button>
             </div>
           </div>

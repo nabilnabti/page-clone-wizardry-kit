@@ -25,7 +25,7 @@ export default function Tenants() {
   if (isLoading) {
     return (
       <div className="p-6">
-        <h1 className="text-2xl font-semibold text-white mb-6">Tenants</h1>
+        <h1 className="text-2xl font-semibold text-white mb-6">Locataires</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
             <Card key={i} className="p-4 bg-[#242E3E] border-none shadow-md animate-pulse">
@@ -56,6 +56,16 @@ export default function Tenants() {
             propertyId={user.propertyId} 
             onTenantAdded={() => refetch()}
           />
+        )}
+        {!user?.propertyId && (
+          <Button 
+            className="bg-gray-700 text-gray-300 cursor-not-allowed"
+            disabled
+            title="Vous devez d'abord sélectionner une propriété"
+          >
+            <UserPlus className="h-4 w-4 mr-2" />
+            Ajouter un locataire
+          </Button>
         )}
       </div>
       
@@ -104,7 +114,7 @@ export default function Tenants() {
                 </div>
                 <div className="flex items-center text-sm text-gray-300">
                   <Phone size={16} className="mr-2" />
-                  <span>{tenant.phone || 'No phone number'}</span>
+                  <span>{tenant.phone || 'Pas de numéro'}</span>
                 </div>
               </div>
               
@@ -119,7 +129,7 @@ export default function Tenants() {
                   }}
                 >
                   <Edit size={16} className="mr-1" />
-                  Edit
+                  Modifier
                 </Button>
                 <Button 
                   variant="ghost" 
@@ -131,7 +141,7 @@ export default function Tenants() {
                   }}
                 >
                   <Trash size={16} className="mr-1" />
-                  Remove
+                  Supprimer
                 </Button>
               </div>
             </Card>

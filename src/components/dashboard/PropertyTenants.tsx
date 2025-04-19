@@ -27,7 +27,12 @@ export function PropertyTenants({ propertyId }: { propertyId?: string }) {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-white">Locataires</h2>
-        {propertyId && <AddTenantDialog propertyId={propertyId} onTenantAdded={() => refetch()} />}
+        {propertyId && (
+          <AddTenantDialog 
+            propertyId={propertyId} 
+            onTenantAdded={() => refetch()} 
+          />
+        )}
       </div>
       
       {tenants.length === 0 ? (
