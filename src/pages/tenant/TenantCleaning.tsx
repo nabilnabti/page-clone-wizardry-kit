@@ -7,69 +7,137 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/context/AuthContext";
+import { getTenantByUserId } from "@/services/tenantService";
+import { getCleaningTasksByTenant, completeCleaningTask, CleaningTask } from "@/services/cleaningService";
 
 export default function TenantCleaning() {
-  const [cleaningTasks, setCleaningTasks] = useState([
-    { date: "April 26, 2025", task: "Kitchen & Common Areas", assigned: "Thomas", status: "Upcoming", photoUrl: null },
-    { date: "May 10, 2025", task: "Bathroom & Hallway", assigned: "Thomas", status: "Upcoming", photoUrl: null },
-    { date: "May 24, 2025", task: "Living Room & Dining", assigned: "Thomas", status: "Upcoming", photoUrl: null },
-  ]);
-
-  const [selectedTask, setSelectedTask] = useState(null);
+  const [cleaningTasks, setCleaningTasks] = useState<CleaningTask[]>([]);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
   const { toast } = useToast();
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    const fetchCleaningTasks = async () => {
+      if (!user) return;
+
+      try {
+        setIsLoading(true);
+        const tenant = await getTenantByUserId(user.uid);
+        
+        if (tenant) {
+          const tasks = await getCleaningTasksByTenant(tenant.id);
+          setCleaningTasks(tasks);
+        } else {
+          toast({
+            title: "Erreur",
+            description: "Impossible de trouver vos informations de locataire",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching cleaning tasks:", error);
+        toast({
+          title: "Erreur",
+          description: "Une erreur est survenue lors du chargement des tâches de nettoyage",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCleaningTasks();
+  }, [user, toast]);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // Simulate photo upload - in a real app, this would upload to a server
-      const photoUrl = URL.createObjectURL(file);
-      setCleaningTasks(tasks =>
-        tasks.map((task, idx) =>
-          idx === selectedTask
-            ? { ...task, status: "Completed", photoUrl }
-            : task
-        )
-      );
-      setIsDialogOpen(false);
-      toast({
-        title: "Tâche validée",
-        description: "La photo a bien été enregistrée comme preuve de nettoyage.",
-      });
+    if (file && selectedTaskId) {
+      try {
+        await completeCleaningTask(selectedTaskId, file);
+        
+        // Update local state
+        setCleaningTasks(tasks =>
+          tasks.map(task =>
+            task.id === selectedTaskId
+              ? { 
+                  ...task, 
+                  status: "completed", 
+                  photoUrl: URL.createObjectURL(file),
+                  completedAt: new Date().toISOString()
+                }
+              : task
+          )
+        );
+        
+        setIsDialogOpen(false);
+        toast({
+          title: "Tâche validée",
+          description: "La photo a bien été enregistrée comme preuve de nettoyage.",
+        });
+      } catch (error) {
+        console.error("Error uploading cleaning photo:", error);
+        toast({
+          title: "Erreur",
+          description: "Une erreur est survenue lors de l'envoi de la photo",
+          variant: "destructive",
+        });
+      }
     }
   };
+
+  if (isLoading) {
+    return (
+      <TenantLayout title="Cleaning Schedule" showBackButton>
+        <div className="flex justify-center items-center h-64">
+          <p className="text-white">Chargement des tâches de nettoyage...</p>
+        </div>
+      </TenantLayout>
+    );
+  }
+
+  if (cleaningTasks.length === 0) {
+    return (
+      <TenantLayout title="Cleaning Schedule" showBackButton>
+        <div className="flex justify-center items-center h-64">
+          <p className="text-white">Aucune tâche de nettoyage n'est prévue.</p>
+        </div>
+      </TenantLayout>
+    );
+  }
 
   return (
     <TenantLayout title="Cleaning Schedule" showBackButton>
       <div className="space-y-4 md:grid md:grid-cols-2 md:gap-6 md:space-y-0 md:max-w-4xl">
-        {cleaningTasks.map((task, index) => (
-          <Card key={index} className="p-4 bg-white rounded-xl">
+        {cleaningTasks.map((task) => (
+          <Card key={task.id} className="p-4 bg-white rounded-xl">
             <div className="flex items-center gap-3">
               <div className={`w-12 h-12 flex items-center justify-center rounded-full ${
-                task.status === "Completed" ? "bg-green-100" : "bg-[#7FD1C7]/10"
+                task.status === "completed" ? "bg-green-100" : "bg-[#7FD1C7]/10"
               }`}>
-                <span className={task.status === "Completed" ? "text-green-500" : "text-[#7FD1C7]"}>
-                  {task.date.split(",")[0].split(" ")[1]}
+                <span className={task.status === "completed" ? "text-green-500" : "text-[#7FD1C7]"}>
+                  {new Date(task.date).getDate()}
                 </span>
               </div>
               <div className="flex-1">
                 <p className="font-medium">{task.task}</p>
-                <p className="text-sm text-gray-500">{task.date}</p>
+                <p className="text-sm text-gray-500">{new Date(task.date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
               </div>
-              <Dialog open={isDialogOpen && selectedTask === index} onOpenChange={(open) => {
+              <Dialog open={isDialogOpen && selectedTaskId === task.id} onOpenChange={(open) => {
                 setIsDialogOpen(open);
-                if (!open) setSelectedTask(null);
+                if (!open) setSelectedTaskId(null);
               }}>
                 <DialogTrigger asChild>
-                  {task.status === "Completed" ? (
+                  {task.status === "completed" ? (
                     <Button 
                       variant="ghost" 
                       size="icon"
@@ -82,7 +150,7 @@ export default function TenantCleaning() {
                       variant="outline"
                       size="sm"
                       className="gap-2"
-                      onClick={() => setSelectedTask(index)}
+                      onClick={() => setSelectedTaskId(task.id)}
                     >
                       <Camera className="h-4 w-4" />
                       Valider

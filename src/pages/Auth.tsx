@@ -3,17 +3,39 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LogIn, UserPlus, Building, Users } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { UserRole } from "@/context/AuthContext";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [role, setRole] = useState<UserRole>("tenant");
+  const { user, login, register } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) {
+      navigate(user.role === "tenant" ? "/tenant" : "/dashboard");
+    }
+  }, [user, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", { email, password });
+    
+    if (isLogin) {
+      await login(email, password, role);
+    } else {
+      if (!name) {
+        alert("Veuillez entrer votre nom");
+        return;
+      }
+      await register(email, password, name, role);
+    }
   };
 
   return (
@@ -21,42 +43,57 @@ const Auth = () => {
       <Card className="w-full max-w-md bg-[#1A2533] border-[#7FD1C7]">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-white">
-            {isLogin ? "Welcome back" : "Create an account"}
+            {isLogin ? "Bienvenue" : "Créer un compte"}
           </CardTitle>
           <CardDescription className="text-gray-400">
             {isLogin
-              ? "Choose your account type to sign in"
-              : "Choose your account type and enter your information"}
+              ? "Choisissez votre type de compte pour vous connecter"
+              : "Choisissez votre type de compte et entrez vos informations"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="tenant" className="mb-4">
+          <Tabs 
+            defaultValue="tenant" 
+            className="mb-4"
+            onValueChange={(value) => setRole(value as UserRole)}
+          >
             <TabsList className="w-full bg-[#2A3544]">
               <TabsTrigger value="tenant" className="w-1/2 data-[state=active]:bg-[#7FD1C7] data-[state=active]:text-[#1A2533]">
                 <Users className="mr-2 h-4 w-4" />
-                Tenant
+                Locataire
               </TabsTrigger>
               <TabsTrigger value="landlord" className="w-1/2 data-[state=active]:bg-[#7FD1C7] data-[state=active]:text-[#1A2533]">
                 <Building className="mr-2 h-4 w-4" />
-                Landlord
+                Propriétaire
               </TabsTrigger>
             </TabsList>
             <TabsContent value="tenant">
               <p className="text-sm text-gray-400 mb-4">
                 {isLogin 
-                  ? "Sign in as a tenant to access your coliving space"
-                  : "Register as a tenant to find and manage your coliving space"}
+                  ? "Connectez-vous en tant que locataire pour accéder à votre espace de colocation"
+                  : "Inscrivez-vous en tant que locataire pour rejoindre votre espace de colocation"}
               </p>
             </TabsContent>
             <TabsContent value="landlord">
               <p className="text-sm text-gray-400 mb-4">
                 {isLogin
-                  ? "Sign in as a landlord to access your properties"
-                  : "Register as a landlord to list and manage your properties"}
+                  ? "Connectez-vous en tant que propriétaire pour accéder à vos propriétés"
+                  : "Inscrivez-vous en tant que propriétaire pour gérer vos propriétés"}
               </p>
             </TabsContent>
           </Tabs>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-2">
+                <Input
+                  type="text"
+                  placeholder="Nom complet"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="bg-[#2A3544] border-[#7FD1C7] text-white placeholder:text-gray-400"
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <Input
                 type="email"
@@ -64,15 +101,17 @@ const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-[#2A3544] border-[#7FD1C7] text-white placeholder:text-gray-400"
+                required
               />
             </div>
             <div className="space-y-2">
               <Input
                 type="password"
-                placeholder="Password"
+                placeholder="Mot de passe"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="bg-[#2A3544] border-[#7FD1C7] text-white placeholder:text-gray-400"
+                required
               />
             </div>
             <Button
@@ -80,7 +119,7 @@ const Auth = () => {
               className="w-full bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533] font-medium"
             >
               {isLogin ? <LogIn className="mr-2 h-5 w-5" /> : <UserPlus className="mr-2 h-5 w-5" />}
-              {isLogin ? "Sign In" : "Sign Up"}
+              {isLogin ? "Se connecter" : "S'inscrire"}
             </Button>
           </form>
 
@@ -90,8 +129,8 @@ const Auth = () => {
               className="text-[#7FD1C7] hover:underline text-sm"
             >
               {isLogin
-                ? "Don't have an account? Sign up"
-                : "Already have an account? Sign in"}
+                ? "Vous n'avez pas de compte ? Inscrivez-vous"
+                : "Vous avez déjà un compte ? Connectez-vous"}
             </button>
           </div>
         </CardContent>
