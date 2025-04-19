@@ -1,5 +1,5 @@
 
-import { Building, Home, FileText, House, Payments, Users } from "lucide-react";
+import { Building, Home, FileText, House, CreditCard, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +15,7 @@ import {
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
   { title: "Tenants", icon: Users, url: "/dashboard/tenants" },
-  { title: "Payments", icon: Payments, url: "/dashboard/payments" },
+  { title: "Payments", icon: CreditCard, url: "/dashboard/payments" },
   { title: "Subletting Rules", icon: FileText, url: "/dashboard/subletting-rules" },
   { title: "House Rules", icon: House, url: "/dashboard/house-rules" },
 ];
