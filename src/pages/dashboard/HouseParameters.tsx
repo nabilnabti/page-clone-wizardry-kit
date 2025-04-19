@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,7 +104,7 @@ export default function HouseParameters() {
 
   const onSubmit = async (data: HouseParametersForm) => {
     try {
-      if (!user?.id) {
+      if (!user?.uid) {
         toast.error("User not authenticated");
         return;
       }
@@ -113,7 +114,7 @@ export default function HouseParameters() {
         name: data.name,
         address: data.address,
         rooms: data.totalRooms,
-        landlordId: user.id,
+        landlordId: user.uid,
       };
 
       const propertyId = await addProperty(propertyData);
