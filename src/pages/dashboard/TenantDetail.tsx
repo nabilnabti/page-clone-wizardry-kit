@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,10 @@ import {
   Clock, 
   CreditCard,
   Calendar,
-  Bell 
+  Bell,
+  FileText,
+  Key,
+  UserRound 
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -124,7 +128,7 @@ export default function TenantDetail() {
         <Card className="bg-white">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center">
-              <User className="h-5 w-5 text-[#7FD1C7] mr-2" />
+              <UserRound className="h-5 w-5 text-[#7FD1C7] mr-2" />
               Informations personnelles
             </CardTitle>
           </CardHeader>
@@ -141,6 +145,20 @@ export default function TenantDetail() {
               <div className="flex items-center">
                 <Home className="h-4 w-4 mr-2 text-gray-400" />
                 <span>{tenant.property} - {tenant.room}</span>
+              </div>
+              <Separator className="my-2" />
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Documents</p>
+                <div className="space-y-2">
+                  <Button variant="outline" className="w-full justify-start text-sm">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Contrat de location
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start text-sm">
+                    <Key className="h-4 w-4 mr-2" />
+                    État des lieux
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -225,7 +243,7 @@ export default function TenantDetail() {
           </TabsTrigger>
           <TabsTrigger value="settings" className="data-[state=active]:bg-[#7FD1C7] data-[state=active]:text-[#1A2533]">
             <Home className="h-4 w-4 mr-2" />
-            Paramètres du logement
+            Logement
           </TabsTrigger>
           <TabsTrigger value="history" className="data-[state=active]:bg-[#7FD1C7] data-[state=active]:text-[#1A2533]">
             <Clock className="h-4 w-4 mr-2" />

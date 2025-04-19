@@ -1,7 +1,6 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, CreditCard, AlertCircle, Calendar } from "lucide-react";
+import { Check, CreditCard, AlertCircle, Calendar, Receipt, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 // Mock data - in a real app this would come from an API
@@ -99,9 +98,43 @@ export function TenantPayments({ tenantId }: { tenantId: string }) {
   const payments = paymentsByTenant[tenantId] || [];
   const paidPayments = payments.filter(payment => payment.status === "paid");
   const pendingPayments = payments.filter(payment => payment.status === "pending");
+  
+  // Calculate total paid and pending amounts
+  const totalPaid = paidPayments.reduce((sum, payment) => 
+    sum + parseFloat(payment.amount.replace('€', '')), 0);
+  const totalPending = pendingPayments.reduce((sum, payment) => 
+    sum + parseFloat(payment.amount.replace('€', '')), 0);
 
   return (
     <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <Card className="bg-white">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center">
+              <Receipt className="h-5 w-5 text-[#7FD1C7] mr-2" />
+              Total Payé
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">€{totalPaid.toFixed(2)}</p>
+            <p className="text-sm text-gray-500">{paidPayments.length} paiements</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center">
+              <FileText className="h-5 w-5 text-amber-500 mr-2" />
+              En Attente
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">€{totalPending.toFixed(2)}</p>
+            <p className="text-sm text-gray-500">{pendingPayments.length} paiements</p>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-white">Historique des paiements</h2>
         <Button className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
