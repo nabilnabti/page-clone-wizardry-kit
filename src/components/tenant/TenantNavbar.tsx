@@ -44,6 +44,12 @@ export function TenantNavbar() {
             asChild
             isActive={location.pathname === item.path}
             tooltip={item.label}
+            className={`
+              ${location.pathname === item.path 
+                ? "bg-[#2A3544] text-[#7FD1C7]" 
+                : "text-gray-400 hover:bg-[#2A3544] hover:text-white"}
+              flex items-center space-x-3 w-full px-4 py-2 rounded-md transition-colors
+            `}
           >
             <Link to={item.path}>
               <item.icon className="shrink-0" />
