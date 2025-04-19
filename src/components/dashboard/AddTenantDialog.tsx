@@ -21,7 +21,7 @@ interface AddTenantDialogProps {
 
 export function AddTenantDialog({ propertyId, onTenantAdded }: AddTenantDialogProps) {
   const [email, setEmail] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -60,7 +60,7 @@ export function AddTenantDialog({ propertyId, onTenantAdded }: AddTenantDialogPr
       });
       
       onTenantAdded();
-      setIsOpen(false);
+      setOpen(false);
       setEmail('');
     } catch (error) {
       console.error("Error adding tenant:", error);
@@ -83,7 +83,7 @@ export function AddTenantDialog({ propertyId, onTenantAdded }: AddTenantDialogPr
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild data-testid="add-tenant-trigger">
         <Button className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
           <UserPlus className="h-4 w-4 mr-2" />
