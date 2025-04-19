@@ -17,9 +17,9 @@ const Hero = () => {
       </div>
       <div className="flex-1 flex justify-center lg:justify-end">
         <img
-          src="/lovable-uploads/c133bd5b-f75e-44e6-b6b6-02ff7450a332.png"
+          src="https://images.unsplash.com/photo-1498050108023-c5249f4df085"
           alt="COLIVE App Interface"
-          className="w-full max-w-md"
+          className="w-full max-w-md object-cover rounded-lg shadow-xl"
         />
       </div>
     </section>
