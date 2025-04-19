@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +8,10 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import TenantDashboard from "./pages/tenant/TenantDashboard";
+import TenantPayments from "./pages/tenant/TenantPayments";
+import TenantCleaning from "./pages/tenant/TenantCleaning";
+import TenantChat from "./pages/tenant/TenantChat";
 
 const queryClient = new QueryClient();
 
@@ -20,7 +25,10 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/tenant" element={<TenantDashboard />} />
+          <Route path="/tenant/payments" element={<TenantPayments />} />
+          <Route path="/tenant/cleaning" element={<TenantCleaning />} />
+          <Route path="/tenant/chat" element={<TenantChat />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
