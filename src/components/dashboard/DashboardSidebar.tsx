@@ -5,7 +5,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -27,13 +26,13 @@ export function DashboardSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b border-[#2A3544] pb-2">
-        <div className="flex items-center space-x-2 px-4">
+      <SidebarHeader className="border-b border-[#2A3544] bg-[#1A2533] pb-2">
+        <div className="flex items-center space-x-2 px-4 py-3">
           <Building className="h-6 w-6 text-[#7FD1C7]" />
           <span className="text-white text-xl font-semibold">Coline</span>
         </div>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-[#1A2533]">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -41,7 +40,12 @@ export function DashboardSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild
-                    className={location.pathname === item.url ? "bg-[#2A3544] text-[#7FD1C7]" : ""}
+                    className={`
+                      ${location.pathname === item.url 
+                        ? "bg-[#2A3544] text-[#7FD1C7]" 
+                        : "text-gray-400 hover:bg-[#2A3544] hover:text-white"}
+                      flex items-center space-x-3 w-full px-4 py-2 rounded-md transition-colors
+                    `}
                   >
                     <a 
                       href={item.url} 
@@ -49,10 +53,9 @@ export function DashboardSidebar() {
                         e.preventDefault();
                         navigate(item.url);
                       }}
-                      className="text-gray-300 hover:text-white"
                     >
-                      <item.icon />
-                      <span>{item.title}</span>
+                      <item.icon className="h-5 w-5 mr-3" />
+                      <span className="text-sm">{item.title}</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
