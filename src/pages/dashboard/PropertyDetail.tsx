@@ -34,13 +34,17 @@ export default function PropertyDetail() {
         variant: "destructive",
       });
       navigate("/dashboard");
+    } else {
+      localStorage.setItem('currentPropertyId', propertyId);
     }
   }, [propertyId, navigate]);
+  
+  const isPropertyIdValid = !!propertyId && propertyId !== "undefined" && propertyId !== "null";
   
   const { data: property, isLoading: isLoadingProperty, error: propertyError } = useQuery({
     queryKey: ['property', propertyId],
     queryFn: () => getProperty(propertyId || ''),
-    enabled: !!propertyId,
+    enabled: isPropertyIdValid,
     retry: 1,
     meta: {
       onError: (error: any) => {
@@ -57,18 +61,33 @@ export default function PropertyDetail() {
   const { data: tenants = [], isLoading: isLoadingTenants } = useQuery({
     queryKey: ['tenants', propertyId],
     queryFn: () => getTenantsByProperty(propertyId || ''),
-    enabled: !!propertyId,
+    enabled: isPropertyIdValid,
     retry: 1
   });
   
   const { data: cleaningTasks = [], isLoading: isLoadingTasks } = useQuery({
     queryKey: ['cleaningTasks', propertyId],
     queryFn: () => getCleaningTasksByProperty(propertyId || ''),
-    enabled: !!propertyId,
+    enabled: isPropertyIdValid,
     retry: 1
   });
 
   const isLoading = isLoadingProperty || isLoadingTenants || isLoadingTasks;
+  
+  if (!isPropertyIdValid) {
+    return (
+      <div className="p-6">
+        <div className="text-center py-8">
+          <AlertCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
+          <h2 className="text-2xl font-semibold text-white mb-2">ID de propriété invalide</h2>
+          <p className="text-gray-400 mb-4">L'identifiant de propriété est invalide ou manquant.</p>
+          <Button onClick={() => navigate("/dashboard")}>
+            Retour au Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
   
   if (isLoading) {
     return (

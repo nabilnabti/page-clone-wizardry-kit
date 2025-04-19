@@ -23,8 +23,13 @@ export default function Tenants() {
     } else if (user?.propertyId) {
       // Fallback to user.propertyId if nothing in localStorage
       setCurrentPropertyId(user.propertyId);
+      // Also save it to localStorage for consistency
+      localStorage.setItem('currentPropertyId', user.propertyId);
     }
   }, [user?.propertyId]);
+  
+  // Vérifier que l'ID de propriété est valide
+  const isPropertyIdValid = !!currentPropertyId && currentPropertyId !== "undefined" && currentPropertyId !== "null";
   
   const {
     data: tenants = [],
@@ -34,7 +39,7 @@ export default function Tenants() {
   } = useQuery({
     queryKey: ['tenants', currentPropertyId],
     queryFn: () => getTenantsByProperty(currentPropertyId || ''),
-    enabled: !!currentPropertyId,
+    enabled: isPropertyIdValid,
     staleTime: 5 * 60 * 1000,
     retry: 1,
     meta: {
@@ -54,7 +59,7 @@ export default function Tenants() {
   };
   
   // Handle case when no property is selected
-  if (!currentPropertyId) {
+  if (!isPropertyIdValid) {
     return (
       <div className="p-6">
         <h1 className="text-2xl font-semibold text-white mb-6">Locataires</h1>

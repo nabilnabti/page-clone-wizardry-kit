@@ -27,10 +27,13 @@ export function PropertyTenants({ propertyId }: { propertyId?: string }) {
   
   const activePropertyId = propertyId || currentPropertyId;
   
+  // On vérifie que l'ID de propriété est valide avant de lancer la requête
+  const isPropertyIdValid = !!activePropertyId && activePropertyId !== "undefined" && activePropertyId !== "null";
+  
   const { data: tenants = [], isLoading, refetch, isError } = useQuery({
     queryKey: ['tenants', activePropertyId],
     queryFn: () => getTenantsByProperty(activePropertyId || ''),
-    enabled: !!activePropertyId,
+    enabled: isPropertyIdValid,
     staleTime: 5 * 60 * 1000,
     retry: 1,
     meta: {
@@ -45,7 +48,7 @@ export function PropertyTenants({ propertyId }: { propertyId?: string }) {
     }
   });
 
-  if (!activePropertyId) {
+  if (!isPropertyIdValid) {
     return (
       <div className="p-8 bg-[#242E3E] border-none shadow-md text-center">
         <User className="h-12 w-12 mx-auto mb-4 text-gray-500" />
