@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,7 +12,7 @@ import DashboardHome from "./pages/dashboard/DashboardHome";
 import Tenants from "./pages/dashboard/Tenants";
 import Payments from "./pages/dashboard/Payments";
 import HouseRules from "./pages/dashboard/HouseRules";
-import SublettingRules from "./pages/dashboard/SublettingRules";
+import HouseParameters from "./pages/dashboard/HouseParameters";
 import Subscriptions from "./pages/dashboard/Subscriptions";
 import TenantDashboard from "./pages/tenant/TenantDashboard";
 import TenantPayments from "./pages/tenant/TenantPayments";
@@ -21,7 +22,6 @@ import TenantProfile from "./pages/tenant/TenantProfile";
 import CleaningTasks from "./pages/dashboard/CleaningTasks";
 import PropertyDetail from "./pages/dashboard/PropertyDetail";
 import TenantDetail from "./pages/dashboard/TenantDetail";
-import HouseParameters from "./pages/dashboard/HouseParameters";
 
 const queryClient = new QueryClient();
 
