@@ -63,3 +63,4 @@ export function TenantLayout({ children, title, showBackButton }: TenantLayoutPr
     </SidebarProvider>
   );
 }
+
