@@ -1,7 +1,14 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { Home, CreditCard, Scroll, MessageCircle, UserPen } from "lucide-react";
-import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { 
+  SidebarMenu, 
+  SidebarMenuItem, 
+  SidebarMenuButton, 
+  SidebarHeader,
+  SidebarGroup,
+  SidebarGroupContent
+} from "@/components/ui/sidebar";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/tenant" },
@@ -38,27 +45,30 @@ export function TenantNavbar() {
 
   return (
     <SidebarMenu>
-      {navItems.map((item) => (
-        <SidebarMenuItem key={item.path}>
-          <SidebarMenuButton
-            asChild
-            isActive={location.pathname === item.path}
-            tooltip={item.label}
-            className={`
-              ${location.pathname === item.path 
-                ? "bg-[#2A3544] text-[#7FD1C7]" 
-                : "text-gray-400 hover:bg-[#2A3544] hover:text-white"}
-              flex items-center space-x-3 w-full px-4 py-2 rounded-md transition-colors
-            `}
-          >
-            <Link to={item.path}>
-              <item.icon className="shrink-0" />
-              <span>{item.label}</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      ))}
+      <SidebarGroup>
+        <SidebarGroupContent>
+          {navItems.map((item) => (
+            <SidebarMenuItem key={item.path}>
+              <SidebarMenuButton
+                asChild
+                isActive={location.pathname === item.path}
+                tooltip={item.label}
+                className={`
+                  ${location.pathname === item.path 
+                    ? "bg-[#2A3544] text-[#7FD1C7]" 
+                    : "text-gray-400 hover:bg-[#2A3544] hover:text-white"}
+                  flex items-center space-x-3 w-full px-4 py-2 rounded-md transition-colors
+                `}
+              >
+                <Link to={item.path}>
+                  <item.icon className="h-5 w-5 mr-3" />
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarGroupContent>
+      </SidebarGroup>
     </SidebarMenu>
   );
 }
-
