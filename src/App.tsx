@@ -35,6 +35,7 @@ const App = () => (
             <Route path="payments" element={<Payments />} />
             <Route path="house-rules" element={<HouseRules />} />
             <Route path="subletting-rules" element={<SublettingRules />} />
+            <Route path="subscriptions" element={<Subscriptions />} />
           </Route>
           <Route path="/tenant" element={<TenantDashboard />} />
           <Route path="/tenant/payments" element={<TenantPayments />} />
