@@ -5,7 +5,9 @@ import { ChatList } from "@/components/tenant/ChatList";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send } from "lucide-react";
+import { Send, ArrowLeft } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 // Mock data - in a real app this would come from an API
 const chatList = [
@@ -52,49 +54,157 @@ const conversationHistory = {
 };
 
 export default function TenantChat() {
-  const [selectedChat, setSelectedChat] = useState("landlord");
-  const messages = conversationHistory[selectedChat] || [];
+  const [selectedChat, setSelectedChat] = useState<string | null>(null);
+  const [newMessage, setNewMessage] = useState("");
+  const isMobile = useIsMobile();
+  const messages = selectedChat ? conversationHistory[selectedChat] || [] : [];
 
+  const handleSendMessage = () => {
+    if (!newMessage.trim()) return;
+    // In a real app, this would send the message to an API
+    // For now, we'll just clear the input
+    setNewMessage("");
+  };
+
+  const handleSelectChat = (chatId: string) => {
+    setSelectedChat(chatId);
+  };
+
+  const handleBackToList = () => {
+    setSelectedChat(null);
+  };
+
+  // On desktop, we show both the list and the conversation
+  if (!isMobile) {
+    return (
+      <TenantLayout title="Messages" showBackButton>
+        <div className="grid md:grid-cols-[350px,1fr] gap-4 h-[calc(100vh-200px)]">
+          <div className="overflow-y-auto pb-4">
+            <ChatList
+              chats={chatList}
+              onChatSelect={handleSelectChat}
+              selectedChatId={selectedChat || undefined}
+            />
+          </div>
+
+          <div className="flex flex-col">
+            {selectedChat ? (
+              <>
+                <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+                  {messages.map((msg, index) => (
+                    <div 
+                      key={index} 
+                      className={`flex ${msg.sender === "You" ? "justify-end" : "justify-start"}`}
+                    >
+                      <Card className={`p-3 max-w-[80%] ${
+                        msg.sender === "You" ? "bg-[#7FD1C7] text-white" : "bg-white"
+                      }`}>
+                        <div className="flex flex-col">
+                          <p className="text-sm font-medium">{msg.sender}</p>
+                          <p>{msg.message}</p>
+                          <p className="text-xs text-right mt-1 opacity-70">{msg.time}</p>
+                        </div>
+                      </Card>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="sticky bottom-0 bg-[#1A2533] pt-2">
+                  <div className="flex gap-2">
+                    <Input 
+                      placeholder="Écrivez un message..." 
+                      className="bg-white" 
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                    />
+                    <Button className="bg-[#7FD1C7]" onClick={handleSendMessage}>
+                      <Send size={18} />
+                    </Button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center text-gray-400">
+                  <p>Sélectionnez une conversation pour commencer à discuter</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </TenantLayout>
+    );
+  }
+
+  // On mobile, we show either the list or the conversation in a sliding sheet
   return (
-    <TenantLayout title="Messages" showBackButton>
-      <div className="grid md:grid-cols-[350px,1fr] gap-4 h-[calc(100vh-200px)]">
-        <div className="hidden md:block overflow-y-auto pb-4">
+    <TenantLayout title="Messages" showBackButton={false}>
+      <div className="h-[calc(100vh-200px)]">
+        {/* Always show the chat list on mobile as the main view */}
+        <div className="overflow-y-auto pb-20">
           <ChatList
             chats={chatList}
-            onChatSelect={setSelectedChat}
-            selectedChatId={selectedChat}
+            onChatSelect={handleSelectChat}
+            selectedChatId={selectedChat || undefined}
           />
         </div>
 
-        <div className="flex flex-col">
-          <div className="flex-1 overflow-y-auto mb-4 space-y-4">
-            {messages.map((msg, index) => (
-              <div 
-                key={index} 
-                className={`flex ${msg.sender === "You" ? "justify-end" : "justify-start"}`}
-              >
-                <Card className={`p-3 max-w-[80%] ${
-                  msg.sender === "You" ? "bg-[#7FD1C7] text-white" : "bg-white"
-                }`}>
-                  <div className="flex flex-col">
-                    <p className="text-sm font-medium">{msg.sender}</p>
-                    <p>{msg.message}</p>
-                    <p className="text-xs text-right mt-1 opacity-70">{msg.time}</p>
-                  </div>
-                </Card>
+        {/* Sheet for displaying the conversation on mobile */}
+        <Sheet open={!!selectedChat} onOpenChange={(open) => !open && setSelectedChat(null)}>
+          <SheetContent side="bottom" className="h-[95vh] p-0 rounded-t-xl">
+            <div className="flex flex-col h-full bg-[#1A2533]">
+              {/* Chat header */}
+              <div className="flex items-center gap-2 p-4 border-b border-gray-700">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleBackToList}
+                  className="mr-2 text-white"
+                >
+                  <ArrowLeft size={20} />
+                </Button>
+                <div className="font-medium text-white">
+                  {selectedChat && chatList.find(chat => chat.id === selectedChat)?.name}
+                </div>
               </div>
-            ))}
-          </div>
-          
-          <div className="sticky bottom-0 bg-[#1A2533] pt-2">
-            <div className="flex gap-2">
-              <Input placeholder="Écrivez un message..." className="bg-white" />
-              <Button className="bg-[#7FD1C7]">
-                <Send size={18} />
-              </Button>
+              
+              {/* Messages container */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messages.map((msg, index) => (
+                  <div 
+                    key={index} 
+                    className={`flex ${msg.sender === "You" ? "justify-end" : "justify-start"}`}
+                  >
+                    <Card className={`p-3 max-w-[80%] ${
+                      msg.sender === "You" ? "bg-[#7FD1C7] text-white" : "bg-white"
+                    }`}>
+                      <div className="flex flex-col">
+                        <p className="text-sm font-medium">{msg.sender}</p>
+                        <p>{msg.message}</p>
+                        <p className="text-xs text-right mt-1 opacity-70">{msg.time}</p>
+                      </div>
+                    </Card>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Message input */}
+              <div className="sticky bottom-0 bg-[#1A2533] p-4 border-t border-gray-700">
+                <div className="flex gap-2">
+                  <Input 
+                    placeholder="Écrivez un message..." 
+                    className="bg-white" 
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                  />
+                  <Button className="bg-[#7FD1C7]" onClick={handleSendMessage}>
+                    <Send size={18} />
+                  </Button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </TenantLayout>
   );
