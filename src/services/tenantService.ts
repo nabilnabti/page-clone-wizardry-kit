@@ -15,7 +15,7 @@ export interface Tenant {
   moveInDate: string;
   moveOutDate?: string;
   rent: number;
-  status: "active" | "inactive";
+  status: "active" | "inactive" | "pending";
   profileImageUrl?: string;
   createdAt: string;
 }
