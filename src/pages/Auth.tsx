@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
-import { LogIn, UserPlus, Building, Users } from "lucide-react";
+import { LogIn, UserPlus, Building, Users, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { UserRole } from "@/context/AuthContext";
@@ -15,6 +15,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState<UserRole>("tenant");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user, login, register } = useAuth();
   const navigate = useNavigate();
 
@@ -26,15 +27,23 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
-    if (isLogin) {
-      await login(email, password, role);
-    } else {
-      if (!name) {
-        alert("Veuillez entrer votre nom");
-        return;
+    try {
+      if (isLogin) {
+        await login(email, password, role);
+      } else {
+        if (!name) {
+          alert("Veuillez entrer votre nom");
+          setIsSubmitting(false);
+          return;
+        }
+        await register(email, password, name, role);
       }
-      await register(email, password, name, role);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -116,9 +125,16 @@ const Auth = () => {
             </div>
             <Button
               type="submit"
+              disabled={isSubmitting}
               className="w-full bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533] font-medium"
             >
-              {isLogin ? <LogIn className="mr-2 h-5 w-5" /> : <UserPlus className="mr-2 h-5 w-5" />}
+              {isSubmitting ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : isLogin ? (
+                <LogIn className="mr-2 h-5 w-5" />
+              ) : (
+                <UserPlus className="mr-2 h-5 w-5" />
+              )}
               {isLogin ? "Se connecter" : "S'inscrire"}
             </Button>
           </form>
@@ -126,7 +142,8 @@ const Auth = () => {
           <div className="mt-4 text-center">
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="text-[#7FD1C7] hover:underline text-sm"
+              disabled={isSubmitting}
+              className="text-[#7FD1C7] hover:underline text-sm disabled:opacity-50"
             >
               {isLogin
                 ? "Vous n'avez pas de compte ? Inscrivez-vous"
@@ -140,3 +157,4 @@ const Auth = () => {
 };
 
 export default Auth;
+

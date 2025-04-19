@@ -98,9 +98,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error(error);
       toast({
         title: "Erreur d'inscription",
-        description: error.message,
+        description: error.message || "Une erreur est survenue lors de l'inscription",
         variant: "destructive",
       });
+      throw error; // Re-throw to allow UI to handle loading state
     }
   };
 
@@ -120,7 +121,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             description: "Type de compte incorrect",
             variant: "destructive",
           });
-          return;
+          throw new Error("Type de compte incorrect");
         }
       }
 
@@ -134,9 +135,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error(error);
       toast({
         title: "Erreur de connexion",
-        description: error.message,
+        description: error.message || "Une erreur est survenue lors de la connexion",
         variant: "destructive",
       });
+      throw error; // Re-throw to allow UI to handle loading state
     }
   };
 
