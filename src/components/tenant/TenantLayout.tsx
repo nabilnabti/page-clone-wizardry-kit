@@ -10,8 +10,8 @@ interface TenantLayoutProps {
 export function TenantLayout({ children, title, showBackButton }: TenantLayoutProps) {
   return (
     <div className="min-h-screen bg-[#1A2533]">
-      <div className="max-w-md mx-auto px-4 pb-20 md:pb-0 md:px-6">
-        <header className="flex items-center pt-6 pb-8">
+      <div className="max-w-md mx-auto px-4 pb-20 md:max-w-4xl md:pb-12 md:px-8 lg:px-12">
+        <header className="flex items-center pt-6 pb-8 md:pt-8 md:pb-10">
           {showBackButton && (
             <button 
               onClick={() => window.history.back()}
@@ -20,9 +20,11 @@ export function TenantLayout({ children, title, showBackButton }: TenantLayoutPr
               ←
             </button>
           )}
-          <h1 className="text-xl text-white font-semibold">{title}</h1>
+          <h1 className="text-xl text-white font-semibold md:text-2xl">{title}</h1>
         </header>
-        {children}
+        <div className="md:grid md:grid-cols-[repeat(auto-fit,minmax(300px,1fr))] md:gap-6">
+          {children}
+        </div>
       </div>
       <TenantNavbar />
     </div>

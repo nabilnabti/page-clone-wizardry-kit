@@ -11,8 +11,7 @@ export default function TenantCleaning() {
 
   return (
     <TenantLayout title="Cleaning Schedule" showBackButton>
-      <div className="space-y-4">
-        <h2 className="text-white font-medium mb-2">Your Tasks</h2>
+      <div className="space-y-4 md:grid md:grid-cols-2 md:gap-6 md:space-y-0 md:max-w-4xl">
         {cleaningTasks.map((task, index) => (
           <Card key={index} className="p-4 bg-white rounded-xl">
             <div className="flex items-center gap-3">
