@@ -13,6 +13,7 @@ import Tenants from "./pages/dashboard/Tenants";
 import Payments from "./pages/dashboard/Payments";
 import HouseRules from "./pages/dashboard/HouseRules";
 import SublettingRules from "./pages/dashboard/SublettingRules";
+import Subscriptions from "./pages/dashboard/Subscriptions";
 import TenantDashboard from "./pages/tenant/TenantDashboard";
 import TenantPayments from "./pages/tenant/TenantPayments";
 import TenantCleaning from "./pages/tenant/TenantCleaning";
