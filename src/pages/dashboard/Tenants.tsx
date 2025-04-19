@@ -1,17 +1,18 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, Edit, Trash, Mail, Phone, Plus } from "lucide-react";
+import { User, Edit, Trash, Mail, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getTenantsByProperty } from "@/services/tenantService";
 import { useAuth } from "@/context/AuthContext";
+import { AddTenantDialog } from "@/components/dashboard/AddTenantDialog";
 
 export default function Tenants() {
   const navigate = useNavigate();
   const { user } = useAuth();
   
-  const { data: tenants = [], isLoading } = useQuery({
+  const { data: tenants = [], isLoading, refetch } = useQuery({
     queryKey: ['tenants', user?.propertyId],
     queryFn: () => getTenantsByProperty(user?.propertyId || ''),
     enabled: !!user?.propertyId
@@ -50,10 +51,12 @@ export default function Tenants() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-white">Tenants</h1>
-        <Button className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
-          <Plus className="h-4 w-4 mr-2" />
-          Add New Tenant
-        </Button>
+        {user?.propertyId && (
+          <AddTenantDialog 
+            propertyId={user.propertyId} 
+            onTenantAdded={() => refetch()}
+          />
+        )}
       </div>
       
       {tenants.length === 0 ? (
@@ -61,10 +64,12 @@ export default function Tenants() {
           <User className="h-12 w-12 mx-auto mb-4 text-gray-500" />
           <h3 className="text-white text-lg font-medium mb-2">No tenants yet</h3>
           <p className="text-gray-400 mb-6">You haven't added any tenants to this property yet.</p>
-          <Button className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533] mx-auto">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Your First Tenant
-          </Button>
+          {user?.propertyId && (
+            <AddTenantDialog 
+              propertyId={user.propertyId} 
+              onTenantAdded={() => refetch()}
+            />
+          )}
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

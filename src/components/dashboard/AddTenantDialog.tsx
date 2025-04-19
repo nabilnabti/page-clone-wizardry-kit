@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Mail, Copy, Link } from "lucide-react";
+import { Plus, Mail, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addTenant } from "@/services/tenantService";
 
@@ -50,7 +50,9 @@ export function AddTenantDialog({ propertyId, onTenantAdded }: AddTenantDialogPr
       
       onTenantAdded();
       setIsOpen(false);
+      setEmail('');
     } catch (error) {
+      console.error("Error adding tenant:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
