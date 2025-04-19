@@ -13,9 +13,11 @@ import { Label } from "@/components/ui/label";
 import { Mail, Copy, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addTenant } from "@/services/tenantService";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface AddTenantDialogProps {
-  propertyId: string;
+  propertyId?: string;
   onTenantAdded: () => void;
 }
 
@@ -24,8 +26,24 @@ export function AddTenantDialog({ propertyId, onTenantAdded }: AddTenantDialogPr
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const inviteLink = `https://yourapp.com/join/${propertyId}/${btoa(email)}`;
+  const activePropertyId = propertyId || user?.propertyId;
+  const inviteLink = activePropertyId ? `https://yourapp.com/join/${activePropertyId}/${btoa(email)}` : '';
+
+  const handleButtonClick = () => {
+    if (!activePropertyId) {
+      toast({
+        title: "Aucune propriété sélectionnée",
+        description: "Vous devez d'abord créer ou sélectionner une propriété avant d'ajouter des locataires.",
+        variant: "destructive",
+      });
+      navigate("/dashboard/house-parameters/new");
+      return;
+    }
+    setIsOpen(true);
+  };
 
   const handleAddTenant = async () => {
     if (!email) {
@@ -37,11 +55,22 @@ export function AddTenantDialog({ propertyId, onTenantAdded }: AddTenantDialogPr
       return;
     }
     
+    if (!activePropertyId) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Aucune propriété sélectionnée.",
+      });
+      setIsOpen(false);
+      navigate("/dashboard/house-parameters/new");
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const tenantData = {
         email,
-        propertyId,
+        propertyId: activePropertyId,
         status: 'pending' as const,
         rent: 0,
         roomNumber: '',
@@ -85,7 +114,10 @@ export function AddTenantDialog({ propertyId, onTenantAdded }: AddTenantDialogPr
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild data-testid="add-tenant-trigger">
-        <Button className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]">
+        <Button 
+          className="bg-[#7FD1C7] hover:bg-[#6BC0B6] text-[#1A2533]"
+          onClick={handleButtonClick}
+        >
           <UserPlus className="h-4 w-4 mr-2" />
           Ajouter un locataire
         </Button>
