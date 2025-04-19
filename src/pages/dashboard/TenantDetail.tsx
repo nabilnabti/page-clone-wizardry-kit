@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,14 +10,16 @@ import {
   Home, 
   AlertTriangle, 
   Clock, 
-  CreditCard 
+  CreditCard,
+  Calendar,
+  Bell 
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TenantPayments } from "@/components/dashboard/TenantPayments";
+import { useToast } from "@/hooks/use-toast";
 
-// Mock data - in a real app this would come from an API
 const allTenants = [
   { 
     id: "1",
@@ -74,15 +75,15 @@ const allTenants = [
     depositPaid: true,
     status: "active"
   },
-  // Additional tenants omitted for brevity
 ];
 
 export default function TenantDetail() {
   const { tenantId } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const tenant = allTenants.find(t => t.id === tenantId);
-  
+
   if (!tenant) {
     return (
       <div className="p-6">
@@ -95,6 +96,13 @@ export default function TenantDetail() {
       </div>
     );
   }
+
+  const handleSendReminder = (type: 'payment' | 'cleaning' | 'notice') => {
+    toast({
+      title: "Rappel envoyé",
+      description: "Le locataire recevra un email sous peu.",
+    });
+  };
 
   return (
     <div className="p-6">
@@ -172,28 +180,38 @@ export default function TenantDetail() {
         <Card className="bg-white">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center">
-              <CreditCard className="h-5 w-5 text-[#7FD1C7] mr-2" />
-              Informations financières
+              <Bell className="h-5 w-5 text-[#7FD1C7] mr-2" />
+              Actions rapides
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-500">Loyer</p>
-                <p className="font-medium">{tenant.rentAmount} ({tenant.paymentFrequency})</p>
-              </div>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start" 
+                onClick={() => handleSendReminder('payment')}
+              >
+                <CreditCard className="h-4 w-4 mr-2" />
+                Rappel de paiement
+              </Button>
               
-              <div>
-                <p className="text-sm text-gray-500">Caution</p>
-                <div className="flex items-center">
-                  <p className="font-medium">{tenant.depositAmount}</p>
-                  {tenant.depositPaid ? (
-                    <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-200">Payée</Badge>
-                  ) : (
-                    <Badge variant="outline" className="ml-2 bg-red-50 text-red-700 border-red-200">Non payée</Badge>
-                  )}
-                </div>
-              </div>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start" 
+                onClick={() => handleSendReminder('cleaning')}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Rappel de ménage
+              </Button>
+
+              <Button 
+                variant="outline" 
+                className="w-full justify-start text-red-500 hover:text-red-600" 
+                onClick={() => handleSendReminder('notice')}
+              >
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                Envoyer un préavis
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -208,6 +226,10 @@ export default function TenantDetail() {
           <TabsTrigger value="settings" className="data-[state=active]:bg-[#7FD1C7] data-[state=active]:text-[#1A2533]">
             <Home className="h-4 w-4 mr-2" />
             Paramètres du logement
+          </TabsTrigger>
+          <TabsTrigger value="history" className="data-[state=active]:bg-[#7FD1C7] data-[state=active]:text-[#1A2533]">
+            <Clock className="h-4 w-4 mr-2" />
+            Historique
           </TabsTrigger>
         </TabsList>
         
@@ -260,6 +282,25 @@ export default function TenantDetail() {
                     Le locataire a demandé un nouveau matelas. À prévoir pour la semaine prochaine.
                   </p>
                 </div>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="history" className="mt-4">
+          <Card className="bg-white p-6">
+            <h3 className="text-lg font-medium mb-4">Historique des communications</h3>
+            <div className="space-y-4">
+              <div className="border-l-2 border-[#7FD1C7] pl-4">
+                <p className="text-sm text-gray-500">15 Avril 2025</p>
+                <p className="font-medium">Rappel de paiement envoyé</p>
+                <p className="text-sm text-gray-600">Email automatique pour le loyer de Mai</p>
+              </div>
+              
+              <div className="border-l-2 border-[#7FD1C7] pl-4">
+                <p className="text-sm text-gray-500">1 Avril 2025</p>
+                <p className="font-medium">Tâche de ménage assignée</p>
+                <p className="text-sm text-gray-600">Nettoyage des parties communes</p>
               </div>
             </div>
           </Card>
