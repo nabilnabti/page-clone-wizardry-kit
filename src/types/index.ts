@@ -36,13 +36,17 @@ export interface Tenant {
 export interface CleaningTask {
   id: string;
   propertyId: string;
-  task: string;
+  title: string;
+  description?: string;
   date: string;
+  dueDate?: string;
   assignedTenantId: string;
-  status: "upcoming" | "completed";
+  assignedTo?: string;
+  status: "pending" | "completed";
   photoUrl?: string;
   completedAt?: string;
   createdAt: string;
+  task?: string; // For backward compatibility
 }
 
 export interface Message {

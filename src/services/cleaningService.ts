@@ -3,18 +3,7 @@ import { db, storage } from "@/lib/firebase";
 import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
-
-export interface CleaningTask {
-  id: string;
-  propertyId: string;
-  task: string;
-  date: string;
-  assignedTenantId: string;
-  status: "upcoming" | "completed";
-  photoUrl?: string;
-  completedAt?: string;
-  createdAt: string;
-}
+import { CleaningTask } from "@/types";
 
 export const addCleaningTask = async (task: Omit<CleaningTask, "id" | "createdAt">): Promise<string> => {
   const taskId = uuidv4();

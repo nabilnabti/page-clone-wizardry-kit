@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCleaningTasksByProperty, addCleaningTask, updateCleaningTask } from "@/services/cleaningService";
 import { getTenantsByProperty } from "@/services/tenantService";
+import { CleaningTask } from "@/types";
 
 export function PropertyTasks({ propertyId }: { propertyId?: string }) {
   const queryClient = useQueryClient();
@@ -107,10 +108,11 @@ export function PropertyTasks({ propertyId }: { propertyId?: string }) {
       title: newTaskTitle,
       description: newTaskDescription,
       assignedTo: newTaskAssignee,
-      assignedTenantId: assignedTenant?.id,
-      propertyId: propertyId,
+      assignedTenantId: assignedTenant?.id || "",
+      propertyId: propertyId || "",
+      date: new Date().toISOString(),
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      status: "pending"
+      status: "pending" as const
     };
 
     addTaskMutation.mutate(newTask);
@@ -252,7 +254,7 @@ export function PropertyTasks({ propertyId }: { propertyId?: string }) {
                     <div className="flex justify-between text-sm">
                       <div className="flex items-center text-gray-400">
                         <Calendar className="h-4 w-4 mr-1" />
-                        {new Date(task.dueDate).toLocaleDateString()}
+                        {new Date(task.dueDate || task.date).toLocaleDateString()}
                       </div>
                       <span className="text-[#7FD1C7]">{task.assignedTo}</span>
                     </div>
@@ -278,7 +280,7 @@ export function PropertyTasks({ propertyId }: { propertyId?: string }) {
                     <div className="flex justify-between text-sm">
                       <div className="flex items-center text-gray-400">
                         <Calendar className="h-4 w-4 mr-1" />
-                        {new Date(task.dueDate).toLocaleDateString()}
+                        {new Date(task.dueDate || task.date).toLocaleDateString()}
                       </div>
                       <span className="text-gray-400">{task.assignedTo}</span>
                     </div>
